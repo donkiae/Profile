@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="600">
+<title>AI Trade Council</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; color: #58a6ff; }
+  .subtitle { color: #8b949e; font-size: 0.85rem; margin-bottom: 24px; }
+  .section-title { font-size: 1rem; font-weight: 600; color: #8b949e; margin: 24px 0 10px;
+    text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #21262d; padding-bottom: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+
+  .card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px;
+    position: relative; transition: transform 0.15s; }
+  .card:hover { transform: translateY(-2px); }
+  .card.alert { border-color: #f0883e; box-shadow: 0 0 12px rgba(240,136,62,0.3); }
+  .card.buy  { border-left: 4px solid #3fb950; }
+  .card.sell { border-left: 4px solid #f85149; }
+  .card.hold { border-left: 4px solid #8b949e; }
+
+  .flag { position: absolute; top: 12px; right: 12px; background: #f0883e;
+    color: #0d1117; font-size: 0.65rem; font-weight: 800; padding: 3px 8px;
+    border-radius: 4px; letter-spacing: 0.5px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .symbol { font-size: 1.2rem; font-weight: 700; }
+  .price-row { display: flex; align-items: baseline; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+  .price { font-size: 1.4rem; font-weight: 700; }
+  .change.up { color: #3fb950; } .change.down { color: #f85149; }
+  .sentiment { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  .sentiment.bullish { background:#1a3a21; color:#3fb950; }
+  .sentiment.bearish { background:#3d1a1a; color:#f85149; }
+  .sentiment.neutral  { background:#21262d; color:#8b949e; }
+
+  .action-row { display: flex; gap: 8px; margin: 10px 0; align-items: center; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+  .badge.BUY  { background:#1a3a21; color:#3fb950; }
+  .badge.SELL { background:#3d1a1a; color:#f85149; }
+  .badge.HOLD { background:#21262d; color:#8b949e; }
+  .badge.NOW  { background:#f0883e; color:#0d1117; }
+  .badge.WAIT { background:#21262d; color:#e6edf3; }
+  .badge.AVOID{ background:#3d1a1a; color:#f85149; }
+  .duration { padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+    background: #1e2a3a; color: #79c0ff; border: 1px solid #1f4068; }
+
+  .levels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 10px 0; }
+  .level { background:#0d1117; border-radius:6px; padding:6px 8px; text-align:center; }
+  .level-label { font-size:0.65rem; color:#8b949e; text-transform:uppercase; }
+  .level-val { font-size:0.9rem; font-weight:700; }
+  .entry-val { color: #58a6ff; } .target-val { color: #3fb950; } .stop-val { color: #f85149; }
+
+  .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+  .time-box { background:#0d1117; border-radius:6px; padding:6px 8px; text-align:center; }
+  .time-label { font-size:0.62rem; color:#8b949e; text-transform:uppercase; }
+  .time-val { font-size:0.85rem; font-weight:700; color:#e3b341; }
+
+  .risk-row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .risk { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .risk.LOW    { background:#1a3a21; color:#3fb950; }
+  .risk.MEDIUM { background:#3d2a10; color:#f0883e; }
+  .risk.HIGH   { background:#3d1a1a; color:#f85149; }
+  .rr { font-size: 0.75rem; color: #8b949e; }
+  .conf { font-size: 0.75rem; color: #8b949e; margin-left: auto; }
+
+  .signals-block { margin: 8px 0; background:#0d1117; border-radius:6px; padding:8px 10px; }
+  .signals-title { font-size:0.65rem; color:#8b949e; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px; }
+  .signal-item { font-size:0.72rem; color:#c9d1d9; line-height:1.6; }
+  .signal-item::before { content:"· "; color:#58a6ff; }
+
+  .patterns { font-size:0.72rem; color:#d2a8ff; margin: 4px 0 6px; font-style:italic; }
+
+  .fact-check { margin: 8px 0; padding: 7px 10px; border-radius:6px; font-size:0.72rem; }
+  .fact-check.CONFIRM    { background:#1a3a21; border-left:3px solid #3fb950; }
+  .fact-check.CAUTION    { background:#3d2a10; border-left:3px solid #f0883e; }
+  .fact-check.CONTRADICT { background:#3d1a1a; border-left:3px solid #f85149; }
+  .fact-check.unavailable{ background:#21262d; border-left:3px solid #8b949e; }
+  .fact-check-label { font-weight:700; margin-bottom:2px; }
+  .fact-check.CONFIRM .fact-check-label    { color:#3fb950; }
+  .fact-check.CAUTION .fact-check-label    { color:#f0883e; }
+  .fact-check.CONTRADICT .fact-check-label { color:#f85149; }
+
+  .discipline { font-size:0.72rem; color:#e3b341; background:#2d2600; border-radius:5px;
+    padding:5px 9px; margin:6px 0; border-left:3px solid #e3b341; }
+  .no-trade { font-size:0.7rem; color:#f85149; background:#2d1a1a; border-radius:5px;
+    padding:4px 8px; margin:4px 0; }
+
+  .verdict { font-size:0.78rem; color:#8b949e; line-height:1.5; margin-top:8px;
+    border-top:1px solid #21262d; padding-top:8px; }
+  .news { font-size:0.72rem; color:#6e7681; margin-top:6px; font-style:italic; }
+
+  .agent-row { display:flex; gap:6px; margin-top:6px; font-size:0.7rem; color:#6e7681; flex-wrap:wrap; }
+  .agent-tag { padding:1px 6px; border-radius:3px; }
+  .perp { background:#1e2d40; color:#58a6ff; }
+  .gpt  { background:#1a2d1a; color:#3fb950; }
+  .cla  { background:#2d1a2d; color:#d2a8ff; }
+
+  .summary-bar { display:flex; gap:16px; background:#161b22; border:1px solid #21262d;
+    border-radius:10px; padding:14px 20px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat { text-align:center; }
+  .stat-val { font-size:1.5rem; font-weight:700; }
+  .stat-label { font-size:0.7rem; color:#8b949e; text-transform:uppercase; }
+  .stat-val.green { color:#3fb950; } .stat-val.red { color:#f85149; }
+  .stat-val.orange { color:#f0883e; }
+  footer { margin-top:30px; text-align:center; font-size:0.72rem; color:#3d444d; }
+</style>
+</head>
+<body>
+
+<h1>AI Trade Council</h1>
+<p class="subtitle">Last updated: 2026-06-16 09:50:40 &nbsp;|&nbsp; Auto-refreshes every 10 min &nbsp;|&nbsp;
+  <span style="color:#58a6ff">Perplexity</span> &nbsp;+&nbsp;
+  <span style="color:#d2a8ff">Claude</span> &nbsp;|&nbsp; All times in SGT
+</p>
+
+<div class="summary-bar">
+  <div class="stat"><div class="stat-val orange">0</div><div class="stat-label">🚨 Act Now</div></div>
+  <div class="stat"><div class="stat-val green">0</div><div class="stat-label">Buy Signals</div></div>
+  <div class="stat"><div class="stat-val red">0</div><div class="stat-label">Sell Signals</div></div>
+  <div class="stat"><div class="stat-val">2</div><div class="stat-label">Hold / Watch</div></div>
+  <div class="stat"><div class="stat-val">2</div><div class="stat-label">Assets Scanned</div></div>
+</div>
+
+
+<div class="section-title">Forex</div>
+<div class="grid">
+
+
+
+
+
+
+<div class="card  hold">
+  
+
+  <div class="symbol">XAU/USD
+    <span style="font-size:0.7rem;color:#8b949e;font-weight:400;margin-left:6px">H1 · Asian · D1: BEARISH</span>
+  </div>
+
+  <div class="price-row">
+    
+    
+    <span class="price">USD 4,338.50</span>
+    <span class="change down">
+      -0.17%
+    </span>
+    <span class="sentiment neutral">neutral</span>
+  </div>
+
+  <div class="action-row">
+    <span class="badge HOLD">HOLD</span>
+    <span class="badge WAIT">WAIT</span>
+    
+    <span class="duration">&#9201; N/A</span>
+    
+  </div>
+
+  
+  
+  
+  <div class="levels">
+    <div class="level"><div class="level-label">Entry</div><div class="level-val entry-val">4,338.50</div></div>
+    <div class="level"><div class="level-label">Target</div><div class="level-val target-val">0.00000</div></div>
+    <div class="level"><div class="level-label">Stop</div><div class="level-val stop-val">0.00000</div></div>
+  </div>
+
+  
+  <div class="time-row">
+    <div class="time-box"><div class="time-label">Enter at (SGT)</div><div class="time-val">WAIT</div></div>
+    <div class="time-box"><div class="time-label">Exit by (SGT)</div><div class="time-val">N/A</div></div>
+  </div>
+  
+
+  
+  <div class="signals-block">
+    <div class="signals-title">H1 Signal Confluence &nbsp;<span style="color:#e3b341;font-weight:400">ATR 158999.0 pips · Stop dist 23.84985</span></div>
+    
+    <div class="signal-item" style="color:#58a6ff">Stochastic oversold (K:18.2) → BUY bias</div>
+    
+    
+    <div class="signal-item" style="color:#8b949e">RSI neutral (38.0)</div>
+    
+    <div class="signal-item" style="color:#8b949e">MACD momentum rising</div>
+    
+    <div class="signal-item" style="color:#8b949e">Price inside BB (31%B)</div>
+    
+    <div class="signal-item" style="color:#8b949e">EMA20 above EMA50 (uptrend context)</div>
+    
+    <div class="signal-item" style="color:#8b949e">Candle: No clear candlestick pattern</div>
+    
+  </div>
+  
+  <div class="patterns">📊 Stochastic oversold (K:18.2/D:18.5) suggesting potential short-term bounce. However, D1 trend is firmly bearish (EMA20 < EMA50, RSI 41.8). Recent H1 candles show a mild 4-candle recovery off lows but no confirmed reversal pattern. Price is mid-BB at 31%B, MACD histogram negative at -7.84, and session liquidity is low (Asian session).</div>
+  
+  
+
+  
+
+  
+  <div class="discipline">⚠ Minimum 3 directional signals required to trigger a trade. Only 1 directional signal (Stochastic oversold BUY bias) is present. Wait for RSI to drop below 30 and/or a bullish MACD crossover to form additional directional signals before considering entry.</div>
+  
+  
+  <div class="no-trade">🚫 Cancel if: Do not enter if directional signals remain below 3. Also avoid if price breaks below H1 support at 4321.60, confirming continued bearish momentum aligned with D1 trend.</div>
+  
+
+  <div class="risk-row">
+    <span class="risk HIGH">HIGH RISK</span>
+    <span class="rr">R:R 0.0x</span>
+    <span class="conf">Confidence 28%</span>
+  </div>
+
+  <div class="verdict">Only 1 of the required 3 directional signals is present (Stochastic oversold), which is insufficient to trigger a trade under the discipline rules. The D1 trend is bearish, meaning any counter-trend BUY would require 4+ directional signals and would suffer a 20-point confidence penalty. The Asian session also lacks liquidity for clean Forex execution, further supporting a WAIT stance.</div>
+  <div class="news">No recent news</div>
+
+  <div class="agent-row">
+    <span class="agent-tag perp">Perplexity</span>
+    <span class="agent-tag cla">Claude: HOLD</span>
+  </div>
+</div>
+
+
+
+
+
+
+<div class="card  hold">
+  
+
+  <div class="symbol">USD/JPY
+    <span style="font-size:0.7rem;color:#8b949e;font-weight:400;margin-left:6px">H1 · Asian · D1: BULLISH</span>
+  </div>
+
+  <div class="price-row">
+    
+    
+    <span class="price">JPY 160.14</span>
+    <span class="change down">
+      -0.09%
+    </span>
+    <span class="sentiment neutral">neutral</span>
+  </div>
+
+  <div class="action-row">
+    <span class="badge HOLD">HOLD</span>
+    <span class="badge WAIT">WAIT</span>
+    
+    <span class="duration">&#9201; N/A — await signal confirmation</span>
+    
+  </div>
+
+  
+  
+  
+  <div class="levels">
+    <div class="level"><div class="level-label">Entry</div><div class="level-val entry-val">160.14</div></div>
+    <div class="level"><div class="level-label">Target</div><div class="level-val target-val">0.00000</div></div>
+    <div class="level"><div class="level-label">Stop</div><div class="level-val stop-val">0.00000</div></div>
+  </div>
+
+  
+  <div class="time-row">
+    <div class="time-box"><div class="time-label">Enter at (SGT)</div><div class="time-val">London open 15:00 SGT or better setup</div></div>
+    <div class="time-box"><div class="time-label">Exit by (SGT)</div><div class="time-val">N/A</div></div>
+  </div>
+  
+
+  
+  <div class="signals-block">
+    <div class="signals-title">H1 Signal Confluence &nbsp;<span style="color:#e3b341;font-weight:400">ATR 9.7 pips · Stop dist 0.14604</span></div>
+    
+    <div class="signal-item" style="color:#58a6ff">Death Cross EMA20/EMA50 → SELL bias</div>
+    
+    <div class="signal-item" style="color:#58a6ff">Lower highs + lower lows → SELL continuation bias</div>
+    
+    
+    <div class="signal-item" style="color:#8b949e">RSI neutral (51.3)</div>
+    
+    <div class="signal-item" style="color:#8b949e">MACD momentum falling</div>
+    
+    <div class="signal-item" style="color:#8b949e">Price inside BB (38%B)</div>
+    
+    <div class="signal-item" style="color:#8b949e">Candle: No clear candlestick pattern</div>
+    
+  </div>
+  
+  <div class="patterns">📊 Death Cross EMA20/EMA50 on H1 with sequential lower highs and lower lows (▼160.332 → ▼160.142). Price trading below both H1 EMAs. Stochastic K (32) below D (45.2) and declining. Bollinger %B at 37.8% — price drifting toward lower band but not extreme. Bearish micro-structure on H1, but insufficient directional signal count to trade.</div>
+  
+  
+
+  
+
+  
+  <div class="discipline">⚠ Only 2 directional SELL signals present; minimum 3 required to trigger a trade. Counter-trend SELL against D1 bullish bias would require 4+ directional signals. Wait for a third confirmed directional signal (e.g., RSI breaking below 45, MACD histogram turning clearly negative, or price breaking below 159.987 support).</div>
+  
+  
+  <div class="no-trade">🚫 Cancel if: Cancel any SELL consideration if price reclaims above EMA20 (160.207) with momentum, or if D1 bullish trend accelerates. Cancel any BUY consideration if Death Cross deepens and lower-lows pattern continues.</div>
+  
+
+  <div class="risk-row">
+    <span class="risk HIGH">HIGH RISK</span>
+    <span class="rr">R:R 0.0x</span>
+    <span class="conf">Confidence 30%</span>
+  </div>
+
+  <div class="verdict">Only 2 directional SELL signals are confirmed (Death Cross EMA20/EMA50 and lower highs/lower lows), falling short of the minimum 3 required by trading rules. Furthermore, the D1 trend remains BULLISH (EMA20 > EMA50, RSI 65), meaning any SELL would be counter-trend and would require 4+ directional signals — making the threshold even harder to meet. The Asian session also provides reduced liquidity, further discouraging NOW entries. Discipline dictates HOLD until either the signal threshold is met or London session opens with a clearer setup.</div>
+  <div class="news">No recent news</div>
+
+  <div class="agent-row">
+    <span class="agent-tag perp">Perplexity</span>
+    <span class="agent-tag cla">Claude: HOLD</span>
+  </div>
+</div>
+
+</div>
+
+
+<footer>AI Trade Council &mdash; For informational purposes only. Not financial advice.</footer>
+</body>
+</html>

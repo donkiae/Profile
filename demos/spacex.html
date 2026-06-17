@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpaceX Deep Dive — Investment Intelligence Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #161a22;
+    --border: #1e2330;
+    --accent: #4f8ef7;
+    --accent2: #7b5cf0;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --white: #f8fafc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #161a22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 20px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+  .logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  h1 { font-size: 22px; font-weight: 700; color: var(--white); letter-spacing: -0.3px; }
+  .subtitle { font-size: 12px; color: var(--muted); letter-spacing: 0.5px; }
+  .badge { display: inline-block; background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid rgba(79,142,247,0.3); border-radius: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; letter-spacing: 0.5px; margin-left: 8px; }
+  .badge.green { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.3); }
+  .badge.amber { background: rgba(245,158,11,0.15); color: var(--amber); border-color: rgba(245,158,11,0.3); }
+
+  /* NAV */
+  nav { display: flex; gap: 4px; padding: 0 40px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button {
+    background: none; border: none; color: var(--muted); padding: 12px 16px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s;
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* GRID */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 1100px) { .grid-4 { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 800px) { .grid-4,.grid-3,.grid-2,.grid-2-1,.grid-1-2 { grid-template-columns: 1fr; } }
+
+  /* CARD */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(79,142,247,0.25); }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+
+  /* STAT CARD */
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--white); letter-spacing: -1px; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-delta { font-size: 12px; font-weight: 600; margin-top: 6px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+
+  /* SECTION HEADER */
+  .section-header { margin-bottom: 24px; }
+  .section-header h2 { font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .section-header p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* CHART WRAPPER */
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap.tall { height: 360px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-bold { font-weight: 700; color: var(--white); }
+  .td-green { color: var(--green); font-weight: 600; }
+  .td-amber { color: var(--amber); font-weight: 600; }
+  .td-red { color: var(--red); font-weight: 600; }
+
+  /* PROGRESS */
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .progress-label { flex: 0 0 160px; font-size: 12px; color: var(--text); }
+  .progress-bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
+  .progress-val { flex: 0 0 50px; text-align: right; font-size: 12px; font-weight: 600; color: var(--white); }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot { position: absolute; left: -21px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .tl-dot.green { background: var(--green); }
+  .tl-dot.amber { background: var(--amber); }
+  .tl-dot.red { background: var(--red); }
+  .tl-year { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
+  .tl-title { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+  .tl-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* RISK MATRIX */
+  .risk-grid { display: grid; grid-template-columns: repeat(5,1fr); grid-template-rows: repeat(5,1fr); gap: 3px; height: 280px; }
+  .risk-cell { border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; text-align: center; color: rgba(255,255,255,0.7); padding: 4px; cursor: default; transition: transform 0.2s; }
+  .risk-cell:hover { transform: scale(1.05); z-index: 1; }
+  .risk-low { background: rgba(34,197,94,0.2); }
+  .risk-med { background: rgba(245,158,11,0.25); }
+  .risk-high { background: rgba(239,68,68,0.25); }
+  .risk-critical { background: rgba(239,68,68,0.5); }
+  .risk-item { background: rgba(79,142,247,0.5); border: 1px solid var(--accent); font-size: 9px; font-weight: 700; color: white; }
+
+  /* MOAT */
+  .moat-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; gap: 14px; }
+  .moat-item:last-child { border-bottom: none; }
+  .moat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .moat-content h4 { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+  .moat-content p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* COMPETITOR */
+  .comp-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .comp-item:last-child { border-bottom: none; }
+  .comp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .comp-name { font-size: 13px; font-weight: 600; color: var(--white); }
+  .comp-score { font-size: 12px; font-weight: 700; }
+  .comp-bar-wrap { background: var(--surface2); border-radius: 3px; height: 5px; overflow: hidden; }
+  .comp-bar { height: 100%; border-radius: 3px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* TOOLTIP-style source note */
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 10px; font-style: italic; }
+
+  /* PILL */
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .pill-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .pill-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .pill-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .pill-purple { background: rgba(123,92,240,0.15); color: var(--accent2); }
+
+  /* STARLINK GLOBE  */
+  .globe-container { position: relative; width: 100%; height: 280px; overflow: hidden; border-radius: 8px; background: radial-gradient(ellipse at center, #0a1628 0%, #050810 100%); }
+  .globe-svg { width: 100%; height: 100%; }
+
+  /* SEGMENT CARD */
+  .seg-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .seg-card h4 { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .seg-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .seg-metric { margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .seg-m { font-size: 11px; }
+  .seg-m span { font-weight: 700; color: var(--white); }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .h3 { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 16px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">🚀</div>
+    <div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <h1>SpaceX — Deep Dive Analysis</h1>
+        <span class="badge">PRIVATE</span>
+        <span class="badge green">HIGH CONVICTION</span>
+      </div>
+      <div class="subtitle">Space Exploration Technologies Corp &nbsp;·&nbsp; Founded 2002 &nbsp;·&nbsp; Hawthorne, CA &nbsp;·&nbsp; Last updated Jun 2026</div>
+    </div>
+  </div>
+</header>
+
+<nav id="nav">
+  <button class="active" onclick="showSection('overview')">Overview</button>
+  <button onclick="showSection('financials')">Financials</button>
+  <button onclick="showSection('segments')">Business Segments</button>
+  <button onclick="showSection('launches')">Launch Cadence</button>
+  <button onclick="showSection('moat')">Competitive Moat</button>
+  <button onclick="showSection('competitors')">No True Comparable</button>
+  <button onclick="showSection('starlink')">Starlink</button>
+  <button onclick="showSection('starship')">Starship</button>
+  <button onclick="showSection('risks')">Risks</button>
+  <button onclick="showSection('ipo')">IPO Analysis</button>
+  <button onclick="showSection('verdict')">Buy or Don't Buy</button>
+  <button onclick="showSection('timeline')">Timeline</button>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════ OVERVIEW ═══ -->
+<div class="section active" id="overview">
+  <div class="section-header">
+    <h2>Executive Summary</h2>
+    <p>SpaceX has redefined the economics of spaceflight through vertical integration and reusability — becoming the world's dominant launch provider while building Starlink, a rapidly scaling satellite internet business with potential to rival the core launch franchise in value. Elon Musk has explicitly stated SpaceX must reach <strong style="color:var(--accent)">$2 trillion+ in valuation</strong> to generate the capital needed to fund a self-sustaining Mars colony — making the current $350B not a ceiling, but a waypoint.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-label">Latest Valuation</div>
+      <div class="stat-value">$350B</div>
+      <div class="stat-sub">Dec 2024 tender offer</div>
+      <div class="stat-delta up">↑ from $137B (2023)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Est. Revenue 2024</div>
+      <div class="stat-value">$13.1B</div>
+      <div class="stat-sub">vs $9.6B in 2023</div>
+      <div class="stat-delta up">↑ ~36% YoY</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">2024 Launches</div>
+      <div class="stat-value">134</div>
+      <div class="stat-sub">~67% global market share</div>
+      <div class="stat-delta up">↑ from 98 in 2023</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Starlink Subscribers</div>
+      <div class="stat-value">4.6M+</div>
+      <div class="stat-sub">as of Q1 2025</div>
+      <div class="stat-delta up">↑ from ~2.3M (2023)</div>
+    </div>
+  </div>
+
+  <!-- $2T BANNER -->
+  <div style="background:linear-gradient(135deg,rgba(79,142,247,0.1),rgba(123,92,240,0.08));border:1px solid rgba(79,142,247,0.3);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div style="font-size:36px;flex-shrink:0">🎯</div>
+    <div style="flex:1;min-width:260px">
+      <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px">Elon Musk's Stated Target: $2 Trillion+</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">"SpaceX needs to be worth at least $2 trillion to generate enough free cash flow to fund a self-sustaining city on Mars. That's not a financial goal — it's an engineering constraint." — Elon Musk (various interviews, 2023–24). At the Dec 2024 valuation of $350B, SpaceX is at <strong style="color:var(--accent)">~17.5% of the stated target</strong>. Getting to $2T from $350B requires a further ~5.7× — equivalent to growing from Amazon's current size to roughly 2× Apple at today's prices.</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Current → Target</div>
+      <div style="font-size:22px;font-weight:800;color:var(--accent)">$350B → $2T+</div>
+      <div style="font-size:11px;color:var(--muted)">~5.7× still needed</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Revenue Mix Estimate (2024)</div>
+      <div class="chart-wrap">
+        <canvas id="revMixChart"></canvas>
+      </div>
+      <div class="source-note">Sources: Morgan Stanley, Bloomberg, company disclosures. Estimates only — SpaceX is private.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Valuation Milestones ($B)</div>
+      <div class="chart-wrap">
+        <canvas id="valChart"></canvas>
+      </div>
+      <div class="source-note">Based on reported secondary market transactions and funding rounds.</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Key Investment Thesis</div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(79,142,247,0.15)">🔄</div>
+        <div class="moat-content">
+          <h4>Reusability = Cost Moat</h4>
+          <p>Falcon 9 first stages have flown 20+ times. Cost per kg to LEO ~$2,700 vs $54,000 for Space Shuttle.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15)">🌐</div>
+        <div class="moat-content">
+          <h4>Starlink Cash Engine</h4>
+          <p>On track for $6–8B revenue in 2025. Network effects and low-latency LEO advantage vs GEO incumbents.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(245,158,11,0.15)">🚀</div>
+        <div class="moat-content">
+          <h4>Starship Changes Everything</h4>
+          <p>100+ t to LEO fully reusable. If successful: &lt;$100/kg to orbit, unlocking Moon, Mars, point-to-point.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Bull / Bear Scenarios</div>
+      <table>
+        <thead><tr><th>Scenario</th><th>Valuation</th><th>Key Driver</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(79,142,247,0.06)"><td><span class="pill pill-blue">Musk Target</span></td><td class="td-bold" style="color:var(--accent)">$2T+</td><td>Mars capital thesis — stated by Musk as the requirement for a self-sustaining colony</td></tr>
+          <tr><td><span class="pill pill-green">Bull</span></td><td class="td-bold">$1T+</td><td>Starship operational + Starlink 30M subs + Starlink IPO</td></tr>
+          <tr><td><span class="pill pill-blue">Base</span></td><td class="td-bold">$400–600B</td><td>Starlink scales to 15M subs, Falcon continues dominant</td></tr>
+          <tr><td><span class="pill pill-amber">Bear</span></td><td class="td-bold">$150B</td><td>Starship delayed 3+ yrs, Musk political distraction</td></tr>
+          <tr><td><span class="pill pill-red">Tail Risk</span></td><td class="td-bold">$50B</td><td>Fatal accident + regulatory block + key-person event</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Market Context</div>
+      <div style="margin-bottom:14px">
+        <div class="progress-row">
+          <div class="progress-label">Global Launch Market Share</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:67%;background:var(--accent)"></div></div>
+          <div class="progress-val">67%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">US Gov Launch Market</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:75%;background:var(--green)"></div></div>
+          <div class="progress-val">75%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Commercial LEO</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:80%;background:var(--accent2)"></div></div>
+          <div class="progress-val">80%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Sat Internet Subs (vs TAM)</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:8%;background:var(--amber)"></div></div>
+          <div class="progress-val">~8%</div>
+        </div>
+      </div>
+      <div class="source-note">BryceTech Space Report 2025; Morgan Stanley estimates</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINANCIALS ═══ -->
+<div class="section" id="financials">
+  <div class="section-header">
+    <h2>Financial Deep Dive</h2>
+    <p>SpaceX is a private company — financials are reconstructed from reported funding rounds, government contracts (USASpending.gov), satellite subscriber data, and analyst estimates from Morgan Stanley, Goldman Sachs, and Quilty Analytics.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-label">2024E EBITDA</div>
+      <div class="stat-value">~$3.5B</div>
+      <div class="stat-sub">~27% margin est.</div>
+      <div class="stat-delta up">↑ Starlink profitability inflection</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Revenue CAGR (2020-24)</div>
+      <div class="stat-value">52%</div>
+      <div class="stat-sub">From $2B to $13B</div>
+      <div class="stat-delta up">↑ Compound</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Gov Contract Backlog</div>
+      <div class="stat-value">$15B+</div>
+      <div class="stat-sub">NASA, DoD, NRO contracts</div>
+      <div class="stat-delta up">↑ Multi-year visibility</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Cash Raised (Lifetime)</div>
+      <div class="stat-value">$9.5B+</div>
+      <div class="stat-sub">Equity funding rounds</div>
+      <div class="stat-delta">+ extensive debt financing</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Revenue Trajectory ($B, Estimated)</div>
+      <div class="chart-wrap">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue Breakdown by Segment ($B, 2024E)</div>
+      <div class="chart-wrap">
+        <canvas id="segRevChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Key Government Contracts (Confirmed Public Filings)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Contract</th><th>Value</th><th>Client</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="td-bold">NSSL Phase 2 Launch Services</td><td>$316M+/launch</td><td>US Space Force</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td class="td-bold">HLS Lunar Lander (Artemis)</td><td>$2.89B</td><td>NASA</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td class="td-bold">CRS-2 Cargo Resupply</td><td>$1.6B</td><td>NASA</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td class="td-bold">Commercial Crew (CCP)</td><td>$2.6B</td><td>NASA</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td class="td-bold">NRO Reconnaissance Sats</td><td>$1.8B est.</td><td>NRO / USSF</td><td><span class="pill pill-blue">Classified</span></td></tr>
+            <tr><td class="td-bold">Pentagon Starshield</td><td>$1.8B+</td><td>DoD</td><td><span class="pill pill-green">Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cost Structure & Margins</div>
+      <div class="chart-wrap">
+        <canvas id="costChart"></canvas>
+      </div>
+      <div class="source-note">Estimates based on industry benchmarks, analyst models. SpaceX does not disclose financials.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Funding Rounds — Key Milestones</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Round</th><th>Amount Raised</th><th>Valuation</th><th>Key Context</th></tr></thead>
+        <tbody>
+          <tr><td>Mar 2012</td><td>Series D</td><td>$75M</td><td>$2.4B</td><td>First Dragon ISS berthing</td></tr>
+          <tr><td>Jan 2015</td><td>Series E</td><td>$1B</td><td>$12B</td><td>Google + Fidelity; Starlink announced</td></tr>
+          <tr><td>Aug 2017</td><td>Series F</td><td>$351M</td><td>$21.2B</td><td>Falcon Heavy near completion</td></tr>
+          <tr><td>May 2019</td><td>Series H</td><td>$500M</td><td>$33.3B</td><td>First Starlink constellation launch</td></tr>
+          <tr><td>Aug 2020</td><td>Series I</td><td>$1.9B</td><td>$46B</td><td>Crew Dragon flies NASA astronauts</td></tr>
+          <tr><td>Apr 2022</td><td>Series N</td><td>$1.7B</td><td>$127B</td><td>Starlink >250K subs; Inspiration4</td></tr>
+          <tr><td>Jun 2023</td><td>Series N+</td><td>$750M</td><td>$137B</td><td>Starship IFT-1</td></tr>
+          <tr><td>Dec 2024</td><td>Tender Offer</td><td>N/A</td><td class="td-bold">$350B</td><td>Starship reaching orbit; 4M+ subs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ SEGMENTS ═══ -->
+<div class="section" id="segments">
+  <div class="section-header">
+    <h2>Business Segments</h2>
+    <p>SpaceX operates across five interconnected segments. Starlink is rapidly becoming the dominant revenue driver, funding the capital-intensive Starship development program.</p>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:24px">
+    <div class="seg-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">🛰️</span>
+        <h4 style="font-size:15px;font-weight:700;color:var(--white)">Starlink</h4>
+        <span class="badge green">GROWTH ENGINE</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Satellite broadband internet constellation providing global high-speed, low-latency internet. The first commercial service to achieve truly global LEO coverage. Core subscription business with additional government/maritime/aviation verticals.</p>
+      <div class="seg-metric">
+        <div class="seg-m">Subs: <span>4.6M+</span></div>
+        <div class="seg-m">ARPU: <span>~$110/mo</span></div>
+        <div class="seg-m">2024E Rev: <span>$6.1B</span></div>
+        <div class="seg-m">Satellites: <span>~6,700</span></div>
+      </div>
+    </div>
+    <div class="seg-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">🚀</span>
+        <h4 style="font-size:15px;font-weight:700;color:var(--white)">Falcon / Launch</h4>
+        <span class="badge">CORE OPS</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Falcon 9 and Falcon Heavy launch services for commercial customers, NASA, and national security. Reusable first stage booster is the key cost differentiator. Priced at ~$67M per Falcon 9 launch for commercial.</p>
+      <div class="seg-metric">
+        <div class="seg-m">2024 launches: <span>106 F9</span></div>
+        <div class="seg-m">Price/launch: <span>~$67M</span></div>
+        <div class="seg-m">2024E Rev: <span>$4.5B</span></div>
+        <div class="seg-m">Reuse record: <span>22 flights</span></div>
+      </div>
+    </div>
+    <div class="seg-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">🌙</span>
+        <h4 style="font-size:15px;font-weight:700;color:var(--white)">Starship Program</h4>
+        <span class="badge amber">DEVELOPMENT</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Next-generation super heavy lift fully reusable launch system. 9.1m diameter, 121m tall. Designed to carry 100-150t to LEO at &lt;$10M per launch (aspirational). Funded by operating cash flows from Falcon/Starlink.</p>
+      <div class="seg-metric">
+        <div class="seg-m">LEO capacity: <span>150t</span></div>
+        <div class="seg-m">IFT flights: <span>8 (as of 2025)</span></div>
+        <div class="seg-m">NASA contract: <span>$2.89B</span></div>
+        <div class="seg-m">Dev spend: <span>~$2B+/yr</span></div>
+      </div>
+    </div>
+    <div class="seg-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">🔬</span>
+        <h4 style="font-size:15px;font-weight:700;color:var(--white)">Dragon / NASA</h4>
+        <span class="badge">CONTRACTED</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Crew and cargo transportation to ISS under Commercial Crew and CRS-2 programs. Dragon is fully reusable and has flown more people to orbit than any other spacecraft since 2020.</p>
+      <div class="seg-metric">
+        <div class="seg-m">Crew flights: <span>14+ missions</span></div>
+        <div class="seg-m">ISS cargo: <span>~7t/flight</span></div>
+        <div class="seg-m">2024E Rev: <span>~$1.5B</span></div>
+        <div class="seg-m">Backlog: <span>Thru 2030</span></div>
+      </div>
+    </div>
+    <div class="seg-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">🛡️</span>
+        <h4 style="font-size:15px;font-weight:700;color:var(--white)">Starshield / Defense</h4>
+        <span class="badge amber">EMERGING</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Government-focused satellite constellation based on Starlink hardware but optimized for national security applications including ISR, communications relay, and classified DoD missions. Separate subsidiary.</p>
+      <div class="seg-metric">
+        <div class="seg-m">DoD contract: <span>$1.8B+</span></div>
+        <div class="seg-m">NRO award: <span>$1.8B est.</span></div>
+        <div class="seg-m">Growth: <span>Rapid</span></div>
+        <div class="seg-m">Revenue: <span>Classified</span></div>
+      </div>
+    </div>
+    <div class="seg-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">🌍</span>
+        <h4 style="font-size:15px;font-weight:700;color:var(--white)">Space Tourism (Nascent)</h4>
+        <span class="badge">OPTIONALITY</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Inspiration4 (2021), Polaris Dawn (2024), and partnership with Axiom Space for private ISS visits. Not yet a meaningful revenue segment but demonstrates market appetite and Starship opens large-scale opportunity.</p>
+      <div class="seg-metric">
+        <div class="seg-m">Missions flown: <span>4</span></div>
+        <div class="seg-m">Price/seat: <span>~$55M est.</span></div>
+        <div class="seg-m">Revenue: <span>Immaterial</span></div>
+        <div class="seg-m">Potential: <span>Huge w/ Starship</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Segment Revenue Evolution ($B, Estimated)</div>
+    <div class="chart-wrap tall">
+      <canvas id="segEvolutionChart"></canvas>
+    </div>
+    <div class="source-note">Sources: Morgan Stanley Space Team, Quilty Analytics, Canaccord Genuity estimates. Private company — not audited.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ LAUNCHES ═══ -->
+<div class="section" id="launches">
+  <div class="section-header">
+    <h2>Launch Cadence & Market Dominance</h2>
+    <p>SpaceX's launch rate is unprecedented in the history of spaceflight. In 2024, SpaceX launched more rockets than all other launch providers globally combined — achieving roughly one launch every 2.7 days.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-label">2024 Total Launches</div>
+      <div class="stat-value">134</div>
+      <div class="stat-delta up">↑ 37% from 2023</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Falcon 9 Reliability</div>
+      <div class="stat-value">99.3%</div>
+      <div class="stat-sub">344/346 consecutive successes</div>
+      <div class="stat-delta up">↑ Last in-flight failure: Jun 2015 (CRS-7)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Max Booster Reuse</div>
+      <div class="stat-value">22x</div>
+      <div class="stat-sub">B1060 booster (as of 2024)</div>
+      <div class="stat-delta up">↑ Target: 40+ flights/booster</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Launches (Lifetime)</div>
+      <div class="stat-value">380+</div>
+      <div class="stat-sub">All vehicles since 2006</div>
+      <div class="stat-delta up">↑ More than any private co.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Annual Launch Count — SpaceX vs Global Competition</div>
+      <div class="chart-wrap tall">
+        <canvas id="launchChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">2024 Global Launch Market Share</div>
+      <div class="chart-wrap">
+        <canvas id="marketShareChart"></canvas>
+      </div>
+      <div style="margin-top:14px">
+        <div class="progress-row">
+          <div class="progress-label">SpaceX (US)</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:67%;background:var(--accent)"></div></div>
+          <div class="progress-val">67%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">China (CASC/others)</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:17%;background:#ef4444"></div></div>
+          <div class="progress-val">17%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Rocket Lab</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:5%;background:var(--amber)"></div></div>
+          <div class="progress-val">5%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">ULA / Others US</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:5%;background:var(--accent2)"></div></div>
+          <div class="progress-val">5%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Other Global</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:6%;background:var(--muted)"></div></div>
+          <div class="progress-val">6%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Cost per kg to LEO — Historical Benchmarks</div>
+      <div class="chart-wrap">
+        <canvas id="costKgChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Launch Manifest by Customer Type (2024)</div>
+      <div class="chart-wrap">
+        <canvas id="custTypeChart"></canvas>
+      </div>
+      <div class="source-note">Starlink internal launches dominate volume but are not external revenue</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ MOAT ═══ -->
+<div class="section" id="moat">
+  <div class="section-header">
+    <h2>Competitive Moat Analysis</h2>
+    <p>SpaceX's durability rests on multiple overlapping advantages. Each moat reinforces the others — lower costs fund more launches, more launches improve the technology, and Starlink's cash flow funds Starship, which extends the moat further.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Moat Strength Assessment</div>
+      <div style="margin-top:8px">
+        <div class="progress-row">
+          <div class="progress-label">Reusability Technology</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:95%;background:var(--green)"></div></div>
+          <div class="progress-val" style="color:var(--green)">9.5/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Launch Cost Advantage</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:90%;background:var(--green)"></div></div>
+          <div class="progress-val" style="color:var(--green)">9.0/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Talent & Engineering Culture</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:88%;background:var(--green)"></div></div>
+          <div class="progress-val" style="color:var(--green)">8.8/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Vertical Integration</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:85%;background:var(--green)"></div></div>
+          <div class="progress-val" style="color:var(--green)">8.5/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Launch Cadence / Experience</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:92%;background:var(--green)"></div></div>
+          <div class="progress-val" style="color:var(--green)">9.2/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Starlink Network Effects</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:78%;background:var(--amber)"></div></div>
+          <div class="progress-val" style="color:var(--amber)">7.8/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Regulatory Relationships</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:60%;background:var(--amber)"></div></div>
+          <div class="progress-val" style="color:var(--amber)">6.0/10</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Brand / Mission Narrative</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:85%;background:var(--green)"></div></div>
+          <div class="progress-val" style="color:var(--green)">8.5/10</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Moat Deep Dives</div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(79,142,247,0.15)">🏭</div>
+        <div class="moat-content">
+          <h4>Vertical Integration</h4>
+          <p>SpaceX manufactures ~80% of components in-house: Merlin/Raptor engines, avionics, fairings, composite structures. Competitors rely on supply chains with 3-4 years lead times. SpaceX can iterate in months.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15)">📊</div>
+        <div class="moat-content">
+          <h4>Data Flywheel</h4>
+          <p>134 launches in 2024 = 134x the flight data of any competitor. Each launch informs the next. This compounding operational data advantage is not replicable by a competitor launching 10 times per year.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(245,158,11,0.15)">💰</div>
+        <div class="moat-content">
+          <h4>Starlink Cross-Subsidy Engine</h4>
+          <p>Starlink's ~$6B+ revenue (2024E) funds Starship R&D. No competitor has an equivalent internal cash flow to fund next-generation development. Blue Origin needs Bezos; SpaceX is self-sustaining.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(123,92,240,0.15)">🎯</div>
+        <div class="moat-content">
+          <h4>FAA Approval Scarcity</h4>
+          <p>Boca Chica (Starbase) is the only FAA-licensed orbital launch site for Starship. Environmental reviews take 3-5 years. SpaceX locked in infrastructure competitors cannot match in the next decade.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Porter's Five Forces — Space Launch Industry</div>
+    <div class="grid-3" style="margin:0">
+      <div style="padding:16px;background:var(--surface2);border-radius:8px;margin:4px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Threat of New Entrants</div>
+        <div style="font-size:20px;font-weight:700;color:var(--green);margin-bottom:6px">LOW</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Capital requirements $1-5B minimum. 5-10 year development timelines. FAA/DoD approvals take years. Blue Origin took 20+ years to reach orbit.</div>
+      </div>
+      <div style="padding:16px;background:var(--surface2);border-radius:8px;margin:4px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Supplier Power</div>
+        <div style="font-size:20px;font-weight:700;color:var(--green);margin-bottom:6px">LOW</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">SpaceX's vertical integration eliminates most supplier leverage. In-house engines, avionics, structures. SpaceX is the supplier to itself.</div>
+      </div>
+      <div style="padding:16px;background:var(--surface2);border-radius:8px;margin:4px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Buyer Power</div>
+        <div style="font-size:20px;font-weight:700;color:var(--amber);margin-bottom:6px">MEDIUM</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Large customers (NASA, DoD) have leverage but few alternatives. Commercial customers have more choice (Rocket Lab, Ariane) but limited heavy-lift options.</div>
+      </div>
+      <div style="padding:16px;background:var(--surface2);border-radius:8px;margin:4px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Threat of Substitutes</div>
+        <div style="font-size:20px;font-weight:700;color:var(--green);margin-bottom:6px">LOW</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">There is no substitute for access to space. Satellite networks cannot be replaced by terrestrial alternatives for global coverage. SpaceX IS the substitute for legacy providers.</div>
+      </div>
+      <div style="padding:16px;background:var(--surface2);border-radius:8px;margin:4px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Industry Rivalry</div>
+        <div style="font-size:20px;font-weight:700;color:var(--amber);margin-bottom:6px">MEDIUM</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Chinese state-backed providers (LandSpace, CASC) are the most credible long-term competitive threat. Western rivals (ULA, Ariane) are structurally disadvantaged on cost.</div>
+      </div>
+      <div style="padding:16px;background:var(--surface2);border-radius:8px;margin:4px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+        <div style="font-size:28px;margin-bottom:8px">🏆</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);text-align:center">Overall Industry Attractiveness</div>
+        <div style="font-size:22px;font-weight:700;color:var(--green);margin-top:6px">HIGHLY FAVORABLE</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:center">for SpaceX specifically</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ COMPETITORS ═══ -->
+<div class="section" id="competitors">
+  <div class="section-header">
+    <h2>There Is No True Comparable to SpaceX</h2>
+    <p>This is not a cliché — it is a structural valuation problem. SpaceX is simultaneously the world's dominant launch provider, the fastest-growing satellite internet business, a major defense contractor, and the only company with a credible path to Mars. No single public company, and no basket of public companies, cleanly maps to this. Any comp-based valuation will systematically undervalue or misframe the company.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;border-color:rgba(79,142,247,0.3);background:rgba(79,142,247,0.05)">
+    <div style="display:flex;align-items:start;gap:16px">
+      <div style="font-size:32px;flex-shrink:0">⚠️</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px">Why Traditional Comps Break Down</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;font-size:12px;color:var(--muted);line-height:1.7">
+          <div><strong style="color:var(--accent)">vs Rocket Lab (RKLB)</strong><br>RKLB is ~100× smaller by revenue. Small-sat launch only. No satellite internet. No human spaceflight. No defense constellation. Comparing RKLB to SpaceX is like comparing a regional airline to Delta + Amazon + Lockheed combined.</div>
+          <div><strong style="color:var(--accent)">vs Viasat / HughesNet</strong><br>GEO satellite operators with 600ms latency, shrinking subscriber bases, heavy debt, no proprietary launch capability. Declining businesses — the exact opposite of what SpaceX is doing to them.</div>
+          <div><strong style="color:var(--accent)">vs Northrop / Lockheed</strong><br>Defense primes have government revenue but zero commercial internet, no proprietary reusable launch, no consumer business, and grow at 3–5% per year. SpaceX's defense arm alone may eventually exceed ULA in revenue but that's still a fraction of the whole.</div>
+          <div><strong style="color:var(--accent)">vs Amazon / Meta</strong><br>Closest in subscription-revenue model (Starlink ≈ AWS-style recurring) but SpaceX is hardware-intensive with massive CapEx. Amazon Kuiper is a distant Starlink competitor, not a comp for SpaceX itself.</div>
+          <div><strong style="color:var(--accent)">vs Boeing / Airbus</strong><br>Aerospace manufacturers with cost-plus government contracts, no consumer business, legacy union structures, and declining commercial launch divisions. SpaceX has structurally lower costs than both.</div>
+          <div><strong style="color:var(--accent)">vs Virgin Galactic (SPCE)</strong><br>The cautionary tale. SPCE peaked at ~$13B market cap in 2021, collapsed to $60M by 2023 and was delisted. Suborbital tourism only. Zero revenue model. No satellite business. SpaceX is the inverse of this — but the association with "space stocks" is a real investor perception risk.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">The Closest "Frankenstein Comp" Basket</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Since no single comparable exists, analysts blend a weighted basket. Even this is imperfect — it misses the Starship optionality entirely.</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th>Public Proxy</th><th>Weight</th><th>Why It Fits</th><th>Why It Fails</th></tr></thead>
+        <tbody>
+          <tr><td class="td-bold">Satellite Internet (Starlink)</td><td>Amazon (Kuiper proxy) / SES</td><td class="td-bold" style="color:var(--green)">~40%</td><td>Recurring subscription, global broadband TAM, network effect</td><td>Amazon has AWS/retail; SES is GEO/declining</td></tr>
+          <tr><td class="td-bold">Launch Services</td><td>Rocket Lab (RKLB)</td><td class="td-bold" style="color:var(--blue)">~20%</td><td>Commercial launch provider, reusability thesis</td><td>RKLB is 100× smaller, no heavy-lift, no human flight</td></tr>
+          <tr><td class="td-bold">Defense / Gov Contracts</td><td>Northrop Grumman / L3Harris</td><td class="td-bold" style="color:var(--amber)">~20%</td><td>Long-term gov contracts, national security role</td><td>No consumer business, cost-plus vs SpaceX fixed-price</td></tr>
+          <tr><td class="td-bold">Human Spaceflight</td><td>No listed comp exists</td><td class="td-bold" style="color:var(--muted)">~10%</td><td>—</td><td>No public company does commercial crewed spaceflight at scale</td></tr>
+          <tr><td class="td-bold">Starship Optionality</td><td>No listed comp exists</td><td class="td-bold" style="color:var(--muted)">~10%</td><td>—</td><td>No public company is developing a fully reusable super-heavy rocket</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:rgba(239,68,68,0.06);border-radius:8px;border:1px solid rgba(239,68,68,0.2);font-size:12px;color:var(--muted)">
+      <strong style="color:var(--red)">Bottom line:</strong> Any basket-comp approach captures at most 60% of SpaceX's value. The remaining ~40% — Starship optionality, the "infrastructure of space" moat, and the Mars mission narrative — has no public market equivalent. This means both that traditional valuation models will underprice SpaceX at IPO, <em>and</em> that there is no reliable floor on downside if sentiment turns.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">Multi-Dimensional Competitor Comparison</div>
+    <div class="chart-wrap tall">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Competitor Scorecards</div>
+      <div class="comp-item">
+        <div class="comp-header">
+          <div>
+            <div class="comp-name">🔵 Blue Origin (New Glenn)</div>
+            <div style="font-size:11px;color:var(--muted)">Jeff Bezos — ~$12B+ invested, first orbital 2024</div>
+          </div>
+          <span class="comp-score" style="color:var(--amber)">4.2/10</span>
+        </div>
+        <div class="comp-bar-wrap"><div class="comp-bar" style="width:42%;background:var(--amber)"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Most credible US challenger. New Glenn comparable to F9 in LEO capacity but no reuse heritage, no Starlink equivalent. Years behind on cadence.</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-header">
+          <div>
+            <div class="comp-name">🔴 CASC / LandSpace (China)</div>
+            <div style="font-size:11px;color:var(--muted)">State-backed, 64 launches in 2024</div>
+          </div>
+          <span class="comp-score" style="color:var(--amber)">5.5/10</span>
+        </div>
+        <div class="comp-bar-wrap"><div class="comp-bar" style="width:55%;background:var(--red)"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Fastest-growing launch cadence outside SpaceX. LandSpace Zhuque-2 achieved orbit. State subsidies allow below-market pricing. Geopolitical restriction limits customer access in West.</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-header">
+          <div>
+            <div class="comp-name">⚪ ULA (Vulcan Centaur)</div>
+            <div style="font-size:11px;color:var(--muted)">Boeing/Lockheed JV — 6 launches/yr target</div>
+          </div>
+          <span class="comp-score" style="color:var(--red)">3.0/10</span>
+        </div>
+        <div class="comp-bar-wrap"><div class="comp-bar" style="width:30%;background:var(--muted)"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Cost-uncompetitive and government-dependent. Vulcan replaces Atlas V/Delta IV but at higher cost than Falcon 9. No reusability roadmap. Likely to shrink to niche national security role.</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-header">
+          <div>
+            <div class="comp-name">🟢 Rocket Lab (Electron/Neutron)</div>
+            <div style="font-size:11px;color:var(--muted)">RKLB — $1.3B mkt cap, small-sat focused</div>
+          </div>
+          <span class="comp-score" style="color:var(--amber)">5.0/10</span>
+        </div>
+        <div class="comp-bar-wrap"><div class="comp-bar" style="width:50%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Executes well in small-sat niche. Electron first-stage catch recovery proven. Neutron medium-lift vehicle competes in SpaceX's core market — but not before 2026-27.</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-header">
+          <div>
+            <div class="comp-name">🟡 Arianespace (Ariane 6)</div>
+            <div style="font-size:11px;color:var(--muted)">European — €6B development, first flight 2024</div>
+          </div>
+          <span class="comp-score" style="color:var(--red)">3.5/10</span>
+        </div>
+        <div class="comp-bar-wrap"><div class="comp-bar" style="width:35%;background:var(--amber)"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Structural cost disadvantage: no reusability, European labor costs, government consortium overhead. Relies on captive ESA/European government market to survive. Not competitive commercially.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Capability Matrix</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Capability</th><th>SpaceX</th><th>Blue Origin</th><th>China</th><th>Rocket Lab</th></tr></thead>
+          <tbody>
+            <tr><td>LEO Heavy Lift (&gt;20t)</td><td class="td-green">✓ F9H/SS</td><td class="td-amber">◑ NG</td><td class="td-amber">◑ CZ-5</td><td class="td-red">✗</td></tr>
+            <tr><td>Booster Reuse</td><td class="td-green">✓ 22x</td><td class="td-amber">◑ Dev</td><td class="td-amber">◑ Dev</td><td class="td-amber">◑ Catch</td></tr>
+            <tr><td>Human Spaceflight</td><td class="td-green">✓ 14+ missions</td><td class="td-amber">◑ NS tourism</td><td class="td-green">✓ Shenzhou</td><td class="td-red">✗</td></tr>
+            <tr><td>Satellite Internet</td><td class="td-green">✓ 4.6M subs</td><td class="td-amber">◑ Kuiper (dev)</td><td class="td-amber">◑ SatNet</td><td class="td-red">✗</td></tr>
+            <tr><td>Super Heavy (&gt;100t)</td><td class="td-amber">◑ Starship dev</td><td class="td-red">✗ NA</td><td class="td-amber">◑ LM-9 dev</td><td class="td-red">✗</td></tr>
+            <tr><td>Lunar Lander</td><td class="td-green">✓ NASA HLS</td><td class="td-amber">◑ BLAAST</td><td class="td-amber">◑ 2030 target</td><td class="td-red">✗</td></tr>
+            <tr><td>Launch Price (/kg LEO)</td><td class="td-green">~$2,700</td><td class="td-amber">~$5,000</td><td class="td-amber">~$3,000*</td><td class="td-red">~$30,000</td></tr>
+          </tbody>
+        </table>
+        <div class="source-note">*China restricted to non-Western customers due to ITAR/export controls</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ STARLINK ═══ -->
+<div class="section" id="starlink">
+  <div class="section-header">
+    <h2>Starlink — The Cash Engine</h2>
+    <p>Starlink is arguably SpaceX's most strategically important asset — a rapidly growing, high-margin, subscription-based business with global coverage and network effects. Morgan Stanley estimates Starlink could be worth $200B+ as a standalone entity.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-label">Active Satellites</div>
+      <div class="stat-value">~6,700</div>
+      <div class="stat-sub">Licensed for 42,000</div>
+      <div class="stat-delta up">↑ Gen 2 deployment ongoing</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Countries Served</div>
+      <div class="stat-value">100+</div>
+      <div class="stat-sub">All continents incl. Antarctica</div>
+      <div class="stat-delta up">↑ Maritime/aero expanding</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Latency</div>
+      <div class="stat-value">~25ms</div>
+      <div class="stat-sub">vs 600ms+ for GEO</div>
+      <div class="stat-delta up">↑ 10-20ms with direct-to-cell</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Est. Starlink Revenue (2025E)</div>
+      <div class="stat-value">$8B+</div>
+      <div class="stat-sub">~60% of SpaceX total</div>
+      <div class="stat-delta up">↑ IPO speculation at $150B+</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Starlink Subscriber Growth (M)</div>
+      <div class="chart-wrap">
+        <canvas id="slSubsChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Starlink Revenue Projection ($B)</div>
+      <div class="chart-wrap">
+        <canvas id="slRevChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Product Tiers & ARPU</div>
+      <table>
+        <thead><tr><th>Tier</th><th>Price/Mo</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td class="td-bold">Residential</td><td>$120</td><td>Consumer homes</td></tr>
+          <tr><td class="td-bold">Business</td><td>$250–500</td><td>SMBs</td></tr>
+          <tr><td class="td-bold">Maritime</td><td>$1,000–5,000</td><td>Ships/vessels</td></tr>
+          <tr><td class="td-bold">Aviation</td><td>$12,500–25,000</td><td>Airlines</td></tr>
+          <tr><td class="td-bold">Government/Military</td><td>Custom</td><td>DoD/agencies</td></tr>
+          <tr><td class="td-bold">Direct-to-Cell</td><td>Carrier deal</td><td>Mobile operators</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">TAM vs Current Penetration</div>
+      <div style="margin-top:8px">
+        <div class="progress-row">
+          <div class="progress-label">Underserved Broadband (B)</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:100%;background:var(--border)"></div></div>
+          <div class="progress-val" style="color:var(--muted)">3.5B</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Satellite Broadband TAM</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:60%;background:var(--border)"></div></div>
+          <div class="progress-val" style="color:var(--muted)">60M HH</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Current Subscribers</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:8%;background:var(--accent)"></div></div>
+          <div class="progress-val" style="color:var(--accent)">4.6M</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:rgba(79,142,247,0.08);border-radius:8px;border:1px solid rgba(79,142,247,0.2)">
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px">BULL CASE: 50M subs by 2030</div>
+        <div style="font-size:12px;color:var(--muted)">At $100 ARPU = $60B annual revenue. Standalone Starlink IPO at 10-15x revenue = $600B–$900B valuation. Surpasses Meta, equals Amazon.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Starlink vs Competitors</div>
+      <table>
+        <thead><tr><th>Provider</th><th>Subs</th><th>Latency</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="td-bold">Starlink (SpaceX)</td><td class="td-green">4.6M+</td><td class="td-green">25ms</td><td><span class="pill pill-green">Operational</span></td></tr>
+          <tr><td class="td-bold">Amazon Kuiper</td><td class="td-red">~0</td><td>~30ms</td><td><span class="pill pill-amber">Beta 2025</span></td></tr>
+          <tr><td class="td-bold">OneWeb (Eutelsat)</td><td class="td-amber">~50K</td><td>50ms</td><td><span class="pill pill-blue">Limited ops</span></td></tr>
+          <tr><td class="td-bold">HughesNet (GEO)</td><td class="td-muted">1.1M</td><td>600ms</td><td><span class="pill pill-red">Declining</span></td></tr>
+          <tr><td class="td-bold">Viasat (GEO)</td><td class="td-muted">590K</td><td>600ms</td><td><span class="pill pill-red">Declining</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ STARSHIP ═══ -->
+<div class="section" id="starship">
+  <div class="section-header">
+    <h2>Starship — The Moonshot</h2>
+    <p>Starship is the most ambitious rocket ever built. If it achieves operational status, it would be more transformative than any prior launch vehicle — reducing the cost of access to space by 10-100x and making large-scale space infrastructure economically viable for the first time.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-label">Height</div>
+      <div class="stat-value">121m</div>
+      <div class="stat-sub">Taller than Statue of Liberty (93m)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LEO Payload Capacity</div>
+      <div class="stat-value">150t</div>
+      <div class="stat-sub">vs Saturn V: 130t, SLS: 95t</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Raptor Engines</div>
+      <div class="stat-value">33+6</div>
+      <div class="stat-sub">Booster + Ship. Most powerful rocket</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Target Cost/Launch</div>
+      <div class="stat-value">&lt;$10M</div>
+      <div class="stat-sub">Aspirational; current Falcon ~$67M</div>
+    </div>
+  </div>
+
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="card-title">Starship Integrated Flight Tests (IFT) Progress</div>
+      <table>
+        <thead><tr><th>Test</th><th>Date</th><th>Result</th><th>Key Achievement</th></tr></thead>
+        <tbody>
+          <tr><td class="td-bold">IFT-1</td><td>Apr 2023</td><td><span class="pill pill-amber">Partial</span></td><td>Stage sep failed; Flight termination at ~39km</td></tr>
+          <tr><td class="td-bold">IFT-2</td><td>Nov 2023</td><td><span class="pill pill-amber">Partial</span></td><td>Stage separated; hot-staging worked; both lost at altitude</td></tr>
+          <tr><td class="td-bold">IFT-3</td><td>Mar 2024</td><td><span class="pill pill-green">Success+</span></td><td>Reached orbit-class trajectory; splashdown; payload door</td></tr>
+          <tr><td class="td-bold">IFT-4</td><td>Jun 2024</td><td><span class="pill pill-green">Success</span></td><td>Both stages controlled splashdown for first time</td></tr>
+          <tr><td class="td-bold">IFT-5</td><td>Oct 2024</td><td><span class="pill pill-green">Milestone</span></td><td>🔥 Booster caught by Mechazilla arms — unprecedented</td></tr>
+          <tr><td class="td-bold">IFT-6</td><td>Jan 2025</td><td><span class="pill pill-green">Success</span></td><td>Second booster catch; Starship splashdown controlled</td></tr>
+          <tr><td class="td-bold">IFT-7</td><td>Mar 2025</td><td><span class="pill pill-green">Success+</span></td><td>Both booster catch + ship catch; full system reuse demo</td></tr>
+          <tr><td class="td-bold">IFT-8+</td><td>2025-26</td><td><span class="pill pill-blue">Ongoing</span></td><td>Refueling demos; payload deployment; NASA Artemis prep</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Starship Addressable Opportunities</div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(245,158,11,0.15);font-size:16px">🌙</div>
+        <div class="moat-content">
+          <h4>NASA Artemis Moon Lander</h4>
+          <p>$2.89B contract to land astronauts on Moon by 2026+. Optionally valued at $10B+ in follow-on contracts.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(239,68,68,0.15);font-size:16px">🔴</div>
+        <div class="moat-content">
+          <h4>Mars Colonization</h4>
+          <p>Elon Musk's stated mission. First crewed Mars mission target 2028-2030. Opens trillion-dollar optionality.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(79,142,247,0.15);font-size:16px">🌍</div>
+        <div class="moat-content">
+          <h4>Point-to-Point Earth</h4>
+          <p>Theoretical: NYC to Tokyo in 37 minutes. Premium travel TAM $20B+/yr if ever realized.</p>
+        </div>
+      </div>
+      <div class="moat-item">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15);font-size:16px">🛰️</div>
+        <div class="moat-content">
+          <h4>Next-Gen Starlink Deploy</h4>
+          <p>Starship V2 can deploy 400 Starlink sats per launch vs 60 on Falcon 9. Cuts constellation cost 80%.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Starship vs History's Largest Rockets (Payload to LEO, tonnes)</div>
+    <div class="chart-wrap">
+      <canvas id="rocketCompChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ RISKS ═══ -->
+<div class="section" id="risks">
+  <div class="section-header">
+    <h2>Risk Analysis</h2>
+    <p>SpaceX is not without significant risks. The company's valuation has priced in near-perfect execution of Starship and Starlink scale, leaving limited margin for error. The single-greatest risk factor remains Elon Musk's political exposure and key-person dependency.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">Risk Register</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Risk Factor</th><th>Category</th><th>Probability</th><th>Impact</th><th>Severity</th><th>Mitigation</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="td-bold">Elon Musk Key-Person Risk</td>
+            <td>Governance</td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td><span class="pill pill-red">Critical</span></td>
+            <td class="td-red">CRITICAL</td>
+            <td>Strong exec team (Shotwell); strong culture</td>
+          </tr>
+          <tr>
+            <td class="td-bold">Musk Political Exposure / DOGE Backlash</td>
+            <td>Reputational</td>
+            <td><span class="pill pill-amber">Medium-High</span></td>
+            <td><span class="pill pill-red">High</span></td>
+            <td class="td-red">HIGH</td>
+            <td>Mission-critical contracts limit cancellation</td>
+          </tr>
+          <tr>
+            <td class="td-bold">Starship Catastrophic Failure</td>
+            <td>Technical</td>
+            <td><span class="pill pill-green">Low-Med</span></td>
+            <td><span class="pill pill-red">Critical</span></td>
+            <td class="td-amber">HIGH</td>
+            <td>Gradual test cadence; Falcon 9 fallback</td>
+          </tr>
+          <tr>
+            <td class="td-bold">FAA/EPA Regulatory Block</td>
+            <td>Regulatory</td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td><span class="pill pill-amber">High</span></td>
+            <td class="td-amber">HIGH</td>
+            <td>Boca Chica expansion; Florida backup site</td>
+          </tr>
+          <tr>
+            <td class="td-bold">Amazon Kuiper Competitive Response</td>
+            <td>Competitive</td>
+            <td><span class="pill pill-green">Low-Med</span></td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td class="td-amber">MEDIUM</td>
+            <td>2+ year head start; network effect; brand</td>
+          </tr>
+          <tr>
+            <td class="td-bold">Chinese State-Subsidized Competition</td>
+            <td>Geopolitical</td>
+            <td><span class="pill pill-green">Low (near-term)</span></td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td class="td-amber">MEDIUM</td>
+            <td>ITAR/export controls restrict Chinese access to US/allied customers</td>
+          </tr>
+          <tr>
+            <td class="td-bold">NASA Budget Cuts / Contract Loss</td>
+            <td>Customer</td>
+            <td><span class="pill pill-green">Low</span></td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td class="td-green">LOW-MED</td>
+            <td>Diverse customer base; Starlink reduces NASA dependency</td>
+          </tr>
+          <tr>
+            <td class="td-bold">Starlink Spectrum / Interference Disputes</td>
+            <td>Regulatory</td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td><span class="pill pill-green">Low</span></td>
+            <td class="td-green">LOW</td>
+            <td>ITU filing priority; direct-to-cell as alternative</td>
+          </tr>
+          <tr>
+            <td class="td-bold">Valuation Inflation / Private Illiquidity</td>
+            <td>Financial</td>
+            <td><span class="pill pill-amber">Medium-High</span></td>
+            <td><span class="pill pill-amber">Medium</span></td>
+            <td class="td-amber">MEDIUM</td>
+            <td>Starlink IPO potential provides exit optionality</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Risk Heatmap (Probability vs Impact)</div>
+      <div class="chart-wrap tall">
+        <canvas id="riskBubbleChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sensitivity Analysis — Key Value Drivers</div>
+      <div class="chart-wrap tall">
+        <canvas id="sensitivityChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ IPO ═══ -->
+<div class="section" id="ipo">
+  <div class="section-header">
+    <h2>IPO Analysis — Two Paths to Public Markets</h2>
+    <p>SpaceX has two distinct IPO paths: a <strong style="color:var(--accent)">Starlink-only subsidiary IPO</strong> (most likely, Musk has confirmed intent) and a <strong style="color:var(--amber)">full SpaceX IPO</strong> (Musk has resisted, calling it a distraction). These are fundamentally different investments with different risk/return profiles.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="card" style="border-color:rgba(79,142,247,0.35)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="font-size:22px">🛰️</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--white)">Path A — Starlink Subsidiary IPO</div>
+          <div style="font-size:11px;color:var(--accent)">MORE LIKELY · Musk confirmed "when cash flow positive"</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px">
+        SpaceX files Starlink as a separate public entity — retaining majority ownership — and raises capital via IPO or direct listing. SpaceX keeps all launch, Starship, Dragon, and defense businesses private. Public investors get exposure to the satellite internet business only.
+      </div>
+      <table style="font-size:12px;width:100%">
+        <tr><td style="color:var(--muted);padding:5px 0">Estimated IPO Valuation</td><td style="color:var(--white);font-weight:700;text-align:right">$150B – $300B</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Revenue at IPO (est.)</td><td style="color:var(--white);font-weight:700;text-align:right">~$8–10B (2025E)</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Implied P/S at IPO</td><td style="color:var(--white);font-weight:700;text-align:right">~15–30×</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">SpaceX ownership retained</td><td style="color:var(--white);font-weight:700;text-align:right">~80–90% est.</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Timeline (speculated)</td><td style="color:var(--white);font-weight:700;text-align:right">2026–2027</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Musk statements</td><td style="color:var(--accent);font-weight:700;text-align:right">Confirmed intent ✓</td></tr>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:rgba(34,197,94,0.08);border-radius:6px;border:1px solid rgba(34,197,94,0.2);font-size:11px;color:var(--green)">
+        What you get: Pure Starlink internet subscription play. Clean, recurring revenue, global TAM, high-growth. Missing: Starship upside, launch dominance, defense moat.
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(245,158,11,0.25)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="font-size:22px">🚀</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--white)">Path B — Full SpaceX IPO</div>
+          <div style="font-size:11px;color:var(--amber)">LESS LIKELY · Musk has resisted public scrutiny pressure</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px">
+        Entire SpaceX entity goes public. All business lines — Starlink, Launch, Dragon, Starship, Starshield — become accessible to public investors. Would be the largest US IPO in history at current valuations. Musk has repeatedly said he does not want this while Starship is still in development.
+      </div>
+      <table style="font-size:12px;width:100%">
+        <tr><td style="color:var(--muted);padding:5px 0">Estimated IPO Valuation</td><td style="color:var(--white);font-weight:700;text-align:right">$300B – $500B+</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Revenue at IPO (est.)</td><td style="color:var(--white);font-weight:700;text-align:right">~$18–22B (2026E)</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Implied P/S at IPO</td><td style="color:var(--white);font-weight:700;text-align:right">~15–25×</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Expected structure</td><td style="color:var(--white);font-weight:700;text-align:right">Dual-class (Musk control)</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Timeline (speculated)</td><td style="color:var(--white);font-weight:700;text-align:right">2028+ (if ever)</td></tr>
+        <tr><td style="color:var(--muted);padding:5px 0">Musk statements</td><td style="color:var(--amber);font-weight:700;text-align:right">Repeatedly resisted ✗</td></tr>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:rgba(245,158,11,0.08);border-radius:6px;border:1px solid rgba(245,158,11,0.2);font-size:11px;color:var(--amber)">
+        What you get: Full exposure to all segments including Starship optionality and defense. But Musk would retain voting control via dual-class shares — public shareholders have limited governance rights.
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Starlink IPO — Valuation Scenario Analysis</div>
+      <div class="chart-wrap">
+        <canvas id="ipoValChart"></canvas>
+      </div>
+      <div class="source-note">P/S multiples benchmarked against high-growth subscription businesses at IPO: Snowflake (68×), CrowdStrike (35×), Datadog (30×), Twilio (20×). Starlink is hardware+software, so discount to pure SaaS applies. The $2T bar represents Musk's stated full-SpaceX target — not a Starlink-only valuation.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Space Stock IPO Performance — Cautionary History</div>
+      <div class="chart-wrap">
+        <canvas id="spaceStockChart"></canvas>
+      </div>
+      <div class="source-note">Indexed to IPO/SPAC merger date = 100. Illustrates the "space stock premium" collapse risk. Starlink is fundamentally different (real revenue, real subscribers) but sentiment contagion is real.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">IPO Structure — What Public Investors Would (and Would Not) Get</div>
+    <div class="grid-2" style="margin:0">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px">What you WOULD get</div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:14px">✓</div>
+          <div class="moat-content"><h4>Starlink Revenue Stream</h4><p>Recurring subscription revenue from 4.6M+ subscribers, growing 50–80% annually. Real cash flow, not speculation.</p></div>
+        </div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:14px">✓</div>
+          <div class="moat-content"><h4>Maritime / Aviation / Gov Upsell</h4><p>High-ARPU enterprise tiers. Each maritime terminal = $1,000–5,000/month vs $120 residential. Mix shift accelerates margins.</p></div>
+        </div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:14px">✓</div>
+          <div class="moat-content"><h4>First-Mover Network Effect</h4><p>3+ year head start over Amazon Kuiper. Gen 2 sats improve speeds. Direct-to-cell deal with T-Mobile activates 2025–26.</p></div>
+        </div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:14px">✓</div>
+          <div class="moat-content"><h4>Captive Launch Advantage</h4><p>SpaceX parent deploys Starlink satellites at near-zero marginal cost. Amazon pays commercial launch rates for Kuiper.</p></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px">What you would NOT get (Starlink-only IPO)</div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:14px">✗</div>
+          <div class="moat-content"><h4>Starship Upside</h4><p>If Starship achieves operational status, the value creation accrues entirely to private SpaceX — not Starlink public shareholders.</p></div>
+        </div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:14px">✗</div>
+          <div class="moat-content"><h4>Launch / Dragon / Defense Revenue</h4><p>~$6–7B of SpaceX's revenue base stays private. Public Starlink shareholders miss the diversification and the Starshield defense growth.</p></div>
+        </div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:14px">✗</div>
+          <div class="moat-content"><h4>Governance Rights</h4><p>Dual-class share structure expected. Musk will retain economic and voting control. Public shareholders are passengers, not partners.</p></div>
+        </div>
+        <div class="moat-item" style="padding:10px 0">
+          <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:14px">✗</div>
+          <div class="moat-content"><h4>Related-Party Pricing Risk</h4><p>SpaceX (parent) will set the launch cost it charges Starlink for satellite deployment. Public investors have no say in the inter-company transfer price — a structural conflict of interest.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ VERDICT ═══ -->
+<div class="section" id="verdict">
+  <div class="section-header">
+    <h2>Buy or Don't Buy — IPO Verdict for Public Investors</h2>
+    <p>The honest answer is nuanced. It is not a clean buy or a clean pass — it depends entirely on which IPO path, at what price, and what kind of investor you are. Here is the unvarnished analysis.</p>
+  </div>
+
+  <!-- VERDICT BANNER -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:12px;padding:24px">
+      <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Starlink IPO — Conditional BUY</div>
+      <div style="font-size:28px;font-weight:800;color:var(--white);margin-bottom:10px">Buy below ~$180B</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">At a valuation below 20× forward revenue (~$9B 2025E), Starlink offers a compelling entry into the fastest-growing broadband business in the world with real subscribers, real cash flow, and a defensible first-mover advantage. Above $250B you are paying for perfection in an execution-dependent story.</div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill pill-green">Real revenue ✓</span>
+        <span class="pill pill-green">50%+ growth ✓</span>
+        <span class="pill pill-green">No true competitor ✓</span>
+        <span class="pill pill-amber">Price-dependent</span>
+      </div>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.04));border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:24px">
+      <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Full SpaceX IPO — WAIT &amp; SEE</div>
+      <div style="font-size:28px;font-weight:800;color:var(--white);margin-bottom:10px">Do not chase at IPO pop</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">If SpaceX IPOs at $350–500B, private investors have already captured most of the compound growth. The incremental upside for public investors requires Starship to work commercially at scale — which is a multi-year, high-variance bet. The governance structure (dual-class) means you have no recourse if Musk's priorities diverge. Wait for the lockup expiry dip.</div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill pill-red">$350B+ already priced ✗</span>
+        <span class="pill pill-red">No governance rights ✗</span>
+        <span class="pill pill-amber">Starship unproven</span>
+        <span class="pill pill-blue">Monitor post-lockup</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:24px">
+    <div class="card">
+      <div class="card-title">Bull Case — Why You Buy</div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(79,142,247,0.2);width:30px;height:30px;font-size:13px">★</div>
+        <div class="moat-content"><h4>Musk's $2T Target Is the Ceiling, Not the Bull Case</h4><p>Musk has explicitly stated SpaceX needs to reach $2T+ to fund Mars colonization. If you believe the mission is credible, $2T is the <em>floor</em> of what SpaceX must become — not speculative optimism. At $350B today, early public investors are still buying in at 17.5% of the stated target.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:13px">1</div>
+        <div class="moat-content"><h4>Largest Unmonetised Subscriber Base in History</h4><p>4.6M subs at $110/mo ARPU = $6B ARR, growing 50%+ YoY. Still &lt;10% of addressable market. Every 10M subs = +$13B ARR.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:13px">2</div>
+        <div class="moat-content"><h4>Direct-to-Cell Changes the TAM</h4><p>T-Mobile deal activates satellite-to-smartphone coverage for 5B+ mobile users globally — no terminal needed. A new revenue layer with near-zero marginal cost per user.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:13px">3</div>
+        <div class="moat-content"><h4>Amazon Kuiper Proves the Market, Not Kills It</h4><p>Kuiper's $10B+ investment validates the LEO internet thesis. Even if Kuiper captures 20% share, the market is large enough for both — and Starlink is years ahead on subs and infrastructure.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(34,197,94,0.15);width:30px;height:30px;font-size:13px">4</div>
+        <div class="moat-content"><h4>No Public Market Equivalent</h4><p>For institutional investors wanting space infrastructure exposure, Starlink would be the only investable, liquid, pure-play LEO broadband asset in the world. Forced buying at any price.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bear Case — Why You Don't</div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:13px">1</div>
+        <div class="moat-content"><h4>Private Investors Already Captured the Upside</h4><p>SpaceX went from $12B (2015) to $350B (2024). That 29× return belongs to private holders. At IPO, public buyers absorb the execution risk with compressed upside.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:13px">2</div>
+        <div class="moat-content"><h4>Elon Musk Key-Person &amp; Political Risk</h4><p>Musk's political polarisation is measurable. A study by Morning Consult (2023–24) showed Starlink brand perception dropped 12 pts among Democrats post-DOGE involvement. Enterprise/gov customers are sensitive to this.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:13px">3</div>
+        <div class="moat-content"><h4>Related-Party Transfer Price Risk</h4><p>SpaceX sets Starlink's launch costs internally. If the parent decides to charge Starlink above-market rates, public shareholders' margins compress — and there is no governance mechanism to stop it.</p></div>
+      </div>
+      <div class="moat-item" style="padding:10px 0">
+        <div class="moat-icon" style="background:rgba(239,68,68,0.15);width:30px;height:30px;font-size:13px">4</div>
+        <div class="moat-content"><h4>CapEx Treadmill</h4><p>Starlink requires continuous satellite replenishment (5-yr lifespan for Gen 1). At 6,700+ satellites, annual replacement CapEx is estimated $1–2B/yr just to maintain coverage, before expansion. Margin pressure is structural.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">The Playbook for Public Investors</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">
+        <div style="padding:10px;background:var(--surface2);border-radius:8px;margin-bottom:10px;border-left:3px solid var(--green)">
+          <strong style="color:var(--white)">If valuation &lt; $180B at IPO (20× 2025E rev)</strong><br>
+          Buy. This is a reasonable entry for a high-growth, defensible subscription business. Size position at 1–3% of portfolio given key-person and governance risk.
+        </div>
+        <div style="padding:10px;background:var(--surface2);border-radius:8px;margin-bottom:10px;border-left:3px solid var(--amber)">
+          <strong style="color:var(--white)">If valuation $180–250B (20–28× fwd rev)</strong><br>
+          Selective buy. Acceptable for growth-oriented investors with 5+ year horizon. Needs Starlink to hit 15M+ subs by 2028 to justify. Consider partial position and add on any post-IPO dip.
+        </div>
+        <div style="padding:10px;background:var(--surface2);border-radius:8px;margin-bottom:10px;border-left:3px solid var(--red)">
+          <strong style="color:var(--white)">If valuation &gt; $250B (&gt;28× fwd rev)</strong><br>
+          Pass on day one. Wait 6–12 months post-IPO. Lockup expiry (day 180) typically creates a 10–25% dip in high-profile tech IPOs as early employees/investors sell. That is your better entry.
+        </div>
+        <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+          <strong style="color:var(--white)">Full SpaceX IPO (any valuation)</strong><br>
+          Monitor post-lockup. Do not buy IPO allocation at $350B+. The story requires Starship to work — binary outcome. If Starship becomes operational by 2027, revisit at that point.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">IPO Valuation Entry Point Analysis — Implied Returns at Different Entry Prices</div>
+    <div class="chart-wrap tall">
+      <canvas id="ipoReturnChart"></canvas>
+    </div>
+    <div class="source-note">Assumes Starlink reaches 20M subscribers by 2028 at $110 avg ARPU = ~$26B ARR. Applies 18× terminal P/S multiple. Discount rate 12%. IRR shown for each entry valuation. Final bar shows the implied IRR if buying full SpaceX today at $350B and Musk hits his $2T target in 7 years (~28% p.a.) — a VC-style return, but requiring perfect execution of Starship + Starlink at scale.</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Precedent: How Big Tech IPOs Performed vs Entry Price</div>
+      <div class="chart-wrap">
+        <canvas id="ipoCompChart"></canvas>
+      </div>
+      <div class="source-note">From IPO day close to 5-year post-IPO. Shows how entry price discipline matters more than the quality of the business. Even great businesses become bad investments at wrong prices.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Key Questions to Monitor Before Pulling the Trigger</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px">
+        <div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--white);font-weight:600;margin-bottom:3px">1. What is the exact IPO structure?</div>
+          Starlink-only vs full SpaceX changes the analysis entirely. Confirm which entity is listing and what revenue/assets transfer.
+        </div>
+        <div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--white);font-weight:600;margin-bottom:3px">2. What are the inter-company agreements?</div>
+          The launch services agreement between SpaceX parent and Starlink — is it arms-length? Fixed price? Market rate? This determines your actual margin.
+        </div>
+        <div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--white);font-weight:600;margin-bottom:3px">3. What share class do public investors receive?</div>
+          If Class A = 1 vote and Musk holds Class B = 10 votes, you have zero governance. Compare with Google (Class A) vs Snap (no voting rights at all).
+        </div>
+        <div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--white);font-weight:600;margin-bottom:3px">4. What is the direct-to-cell uptake by Q1 IPO+1?</div>
+          If T-Mobile activates 30M+ satellite-connected users within 6 months of launch, the revenue model transforms. This is the bull-case accelerant.
+        </div>
+        <div style="padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--white);font-weight:600;margin-bottom:3px">5. Is Musk's political exposure stable or escalating?</div>
+          Brand risk is hard to price. Track enterprise contract renewals and any DoD/NASA contract modifications as leading indicators.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ TIMELINE ═══ -->
+<div class="section" id="timeline">
+  <div class="section-header">
+    <h2>Milestones & Roadmap</h2>
+    <p>SpaceX has consistently delivered on ambitious timelines despite skepticism. The pattern: Musk announces aggressive target, misses date, delivers a few years later with a result that exceeds original specifications.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Historical Milestones</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot red"></div><div class="tl-year">2002</div><div class="tl-title">SpaceX Founded</div><div class="tl-desc">Elon Musk founds SpaceX with $100M of own capital. Mission: reduce spaceflight cost to enable Mars colonization.</div></div>
+        <div class="tl-item"><div class="tl-dot red"></div><div class="tl-year">2008</div><div class="tl-title">Falcon 1 — First Private Orbital Launch</div><div class="tl-desc">After 3 failures nearly bankrupting SpaceX, Falcon 1 Flight 4 reaches orbit. Same week: Tesla near-bankrupt. Musk's darkest hour.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2010</div><div class="tl-title">Falcon 9 First Flight + Dragon Orbit</div><div class="tl-desc">Falcon 9 reaches orbit on first attempt. Dragon becomes first commercial spacecraft to return from orbit.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2012</div><div class="tl-title">Dragon Berths with ISS</div><div class="tl-desc">First commercial spacecraft to berth with International Space Station. Begins $1.6B NASA CRS contract.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2015</div><div class="tl-title">First Booster Landing — History Made</div><div class="tl-desc">Falcon 9 first stage lands upright at Cape Canaveral. First orbital rocket booster ever recovered intact. Reusability era begins.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2017</div><div class="tl-title">First Reflown Booster</div><div class="tl-desc">Falcon 9 booster B1021 relaunches — first reuse of an orbital rocket. Proves commercial viability of reusability.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2018</div><div class="tl-title">Falcon Heavy Demo + Tesla in Space</div><div class="tl-desc">Most powerful operational rocket since Saturn V. Elon's Tesla Roadster launched to heliocentric orbit. Culture moment.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2019</div><div class="tl-title">Starlink Constellation Begins</div><div class="tl-desc">First 60 Starlink satellites launched. Begins the largest satellite constellation ever built.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2020</div><div class="tl-title">Crew Dragon — Humans to ISS</div><div class="tl-desc">First crewed flight from US soil since 2011 Space Shuttle retirement. Restores American human spaceflight independence.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2021</div><div class="tl-title">Inspiration4 — First All-Civilian Orbital</div><div class="tl-desc">First all-civilian orbital spaceflight in history. SpaceX opens commercial human spaceflight market.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2022</div><div class="tl-title">Starlink Deployed to Ukraine</div><div class="tl-desc">Starlink becomes critical military/civilian infrastructure in wartime. Proves national security and resilience value beyond commercial.</div></div>
+        <div class="tl-item"><div class="tl-dot amber"></div><div class="tl-year">2024</div><div class="tl-title">Mechazilla Catches Booster — IFT-5</div><div class="tl-desc">Super Heavy booster caught mid-air by launch tower arms. Called "the most impressive thing I've ever seen" by aerospace engineers.</div></div>
+        <div class="tl-item"><div class="tl-dot green"></div><div class="tl-year">2024</div><div class="tl-title">Polaris Dawn — First Commercial EVA</div><div class="tl-desc">Private astronauts conduct first commercial spacewalk in history. SpaceX demonstrates full-spectrum commercial spaceflight capability.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Forward Roadmap (2025–2030)</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot amber"></div><div class="tl-year">2025–2026</div><div class="tl-title">Starship Commercial Operations</div><div class="tl-desc">First commercial payloads on Starship. On-orbit refueling demonstration. Rapid launch rate increase targeting monthly flights.</div></div>
+        <div class="tl-item"><div class="tl-dot amber"></div><div class="tl-year">2026</div><div class="tl-title">NASA Artemis III — Humans on Moon</div><div class="tl-desc">SpaceX HLS lands astronauts on lunar south pole. First humans on Moon since 1972. ~$10B+ in follow-on contract potential.</div></div>
+        <div class="tl-item"><div class="tl-dot amber"></div><div class="tl-year">2026–2027</div><div class="tl-title">Starlink IPO (Speculated)</div><div class="tl-desc">Multiple reports of Starlink subsidiary IPO preparation. Could raise $5-10B and provide public market price discovery at $150-300B valuation.</div></div>
+        <div class="tl-item"><div class="tl-dot amber"></div><div class="tl-year">2027</div><div class="tl-title">Direct-to-Cell Mass Market</div><div class="tl-desc">Starlink satellite-to-smartphone coverage globally. T-Mobile partnership activates. Eliminates dead zones on all mobile networks.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2028</div><div class="tl-title">Uncrewed Mars Mission</div><div class="tl-desc">Starship cargo mission to Mars demonstrating entry, descent, and landing. SpaceX's stated goal: "making humanity multi-planetary."</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2029–2030</div><div class="tl-title">Starship Point-to-Point / Space Tourism</div><div class="tl-desc">Commercial point-to-point suborbital flights. Large-scale orbital tourism. If operational: opens $100B+ annual addressable market.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2030+</div><div class="tl-title">Crewed Mars Mission</div><div class="tl-desc">Long-stated mission objective. Timeline highly uncertain. Would be the most significant event in human history since Apollo 11.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── UTILS ──────────────────────────────────────────────────────
+const C = (id) => document.getElementById(id).getContext('2d');
+const COLORS = {
+  blue:   'rgba(79,142,247,1)',
+  blue15: 'rgba(79,142,247,0.15)',
+  blue30: 'rgba(79,142,247,0.3)',
+  green:  'rgba(34,197,94,1)',
+  green15:'rgba(34,197,94,0.15)',
+  amber:  'rgba(245,158,11,1)',
+  amber15:'rgba(245,158,11,0.15)',
+  red:    'rgba(239,68,68,1)',
+  red15:  'rgba(239,68,68,0.15)',
+  purple: 'rgba(123,92,240,1)',
+  purple15:'rgba(123,92,240,0.15)',
+  muted:  'rgba(100,116,139,1)',
+  muted15:'rgba(100,116,139,0.15)',
+};
+const DEF = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 12 } },
+    tooltip: {
+      backgroundColor: '#1e2330',
+      titleColor: '#e2e8f0',
+      bodyColor: '#94a3b8',
+      borderColor: '#2d3748',
+      borderWidth: 1,
+      padding: 10,
+    }
+  },
+  scales: {
+    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 11 } } },
+    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 11 } } },
+  }
+};
+
+// NAV
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  renderChartsFor(id);
+}
+
+const rendered = new Set();
+function renderChartsFor(id) {
+  if (rendered.has(id)) return;
+  rendered.add(id);
+  const fns = chartFns[id];
+  if (fns) fns.forEach(f => f());
+}
+
+const chartFns = {};
+
+// ── OVERVIEW charts ────────────────────────────────────────────
+chartFns['overview'] = [
+  () => new Chart(C('revMixChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Starlink Subs', 'Launch Services', 'Dragon/NASA', 'Starshield/Defense', 'Other'],
+      datasets: [{
+        data: [46.5, 34.4, 11.4, 5.3, 2.4],
+        backgroundColor: [COLORS.green, COLORS.blue, COLORS.amber, COLORS.purple, COLORS.muted],
+        borderColor: '#111318', borderWidth: 3,
+      }]
+    },
+    options: { ...DEF, scales: {}, cutout: '65%',
+      plugins: { ...DEF.plugins, legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 10, padding: 8 } } }
+    }
+  }),
+  () => {
+    const vals = [2.4, 3.3, 5.8, 9.6, 13.1, 18, 26];
+    const yrs  = ['2020', '2021', '2022', '2023', '2024E', '2025F', '2026F'];
+    new Chart(C('valChart'), {
+      type: 'bar',
+      data: {
+        labels: ['2015','2017','2019','2020','2022','Jun 2023','Dec 2024'],
+        datasets: [{
+          label: 'Valuation ($B)',
+          data: [12, 21.2, 33.3, 46, 127, 137, 350],
+          backgroundColor: yrs.map((_,i) => i === 6 ? COLORS.green : COLORS.blue30),
+          borderColor: yrs.map((_,i) => i === 6 ? COLORS.green : COLORS.blue),
+          borderWidth: 1, borderRadius: 4,
+        }]
+      },
+      options: { ...DEF, plugins: { ...DEF.plugins, legend: { display: false } },
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => '$'+v+'B' } } }
+      }
+    });
+  }
+];
+
+// ── FINANCIALS charts ──────────────────────────────────────────
+chartFns['financials'] = [
+  () => {
+    new Chart(C('revenueChart'), {
+      type: 'bar',
+      data: {
+        labels: ['2018','2019','2020','2021','2022','2023','2024E','2025F','2026F'],
+        datasets: [
+          { label: 'Revenue ($B)', data: [1.3, 2.0, 2.4, 3.3, 5.8, 9.6, 13.1, 18.0, 26.0],
+            backgroundColor: COLORS.blue15, borderColor: COLORS.blue, borderWidth: 1, borderRadius: 4, order: 2 },
+          { label: 'EBITDA Est. ($B)', data: [null, null, 0.3, 0.5, 0.9, 2.1, 3.5, 5.5, 9.0],
+            type: 'line', borderColor: COLORS.green, backgroundColor: 'transparent',
+            pointBackgroundColor: COLORS.green, tension: 0.4, order: 1 },
+        ]
+      },
+      options: { ...DEF, scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => '$'+v+'B' } } } }
+    });
+  },
+  () => {
+    new Chart(C('segRevChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Starlink', 'Launch Svcs', 'Dragon/NASA', 'Starshield', 'Tourism/Other'],
+        datasets: [{
+          data: [6.1, 4.5, 1.5, 0.7, 0.3],
+          backgroundColor: [COLORS.green, COLORS.blue, COLORS.amber, COLORS.purple, COLORS.muted],
+          borderColor: 'transparent', borderRadius: 4,
+        }]
+      },
+      options: { ...DEF, indexAxis: 'y',
+        plugins: { ...DEF.plugins, legend: { display: false } },
+        scales: { x: { ...DEF.scales.x, ticks: { ...DEF.scales.x.ticks, callback: v => '$'+v+'B' } }, y: DEF.scales.y }
+      }
+    });
+  },
+  () => {
+    new Chart(C('costChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Starlink CapEx', 'Starship R&D', 'Launch Ops', 'Manuf. & Supply', 'G&A'],
+        datasets: [{
+          data: [30, 22, 20, 20, 8],
+          backgroundColor: [COLORS.blue, COLORS.amber, COLORS.green, COLORS.purple, COLORS.muted],
+          borderColor: '#111318', borderWidth: 3,
+        }]
+      },
+      options: { ...DEF, scales: {}, cutout: '60%',
+        plugins: { ...DEF.plugins, legend: { position: 'right', labels: { color: '#94a3b8', font: {size: 11}, boxWidth: 10, padding: 8 } } }
+      }
+    });
+  }
+];
+
+// ── SEGMENTS charts ────────────────────────────────────────────
+chartFns['segments'] = [
+  () => {
+    new Chart(C('segEvolutionChart'), {
+      type: 'bar',
+      data: {
+        labels: ['2020','2021','2022','2023','2024E','2025F','2026F'],
+        datasets: [
+          { label: 'Starlink', data: [0.05, 0.2, 1.4, 3.5, 6.1, 9.5, 14.0],
+            backgroundColor: COLORS.green, borderRadius: 4 },
+          { label: 'Launch Services', data: [1.8, 2.4, 3.0, 3.8, 4.5, 5.0, 6.0],
+            backgroundColor: COLORS.blue, borderRadius: 4 },
+          { label: 'Dragon/NASA', data: [0.4, 0.5, 0.9, 1.5, 1.5, 2.0, 2.5],
+            backgroundColor: COLORS.amber, borderRadius: 4 },
+          { label: 'Starshield/Defense', data: [0, 0.1, 0.3, 0.6, 0.7, 1.2, 2.5],
+            backgroundColor: COLORS.purple, borderRadius: 4 },
+        ]
+      },
+      options: { ...DEF, plugins: { ...DEF.plugins },
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, stacked: true, ticks: { ...DEF.scales.y.ticks, callback: v => '$'+v+'B' } } },
+        // stacked bar
+        // cannot use stacked in x/y shorthand for grouped — override:
+      }
+    });
+  }
+];
+
+// ── LAUNCHES charts ────────────────────────────────────────────
+chartFns['launches'] = [
+  () => {
+    new Chart(C('launchChart'), {
+      type: 'bar',
+      data: {
+        labels: ['2016','2017','2018','2019','2020','2021','2022','2023','2024'],
+        datasets: [
+          { label: 'SpaceX', data: [8, 18, 21, 21, 26, 31, 61, 98, 134],
+            backgroundColor: COLORS.blue, borderRadius: 4 },
+          { label: 'China (CASC+)', data: [22, 18, 39, 34, 39, 55, 64, 67, 68],
+            backgroundColor: COLORS.red15, borderColor: COLORS.red, borderWidth: 1, borderRadius: 4 },
+          { label: 'Russia/Other', data: [19, 20, 20, 25, 18, 25, 22, 20, 15],
+            backgroundColor: COLORS.muted15, borderColor: COLORS.muted, borderWidth: 1, borderRadius: 4 },
+        ]
+      },
+      options: { ...DEF, plugins: { ...DEF.plugins },
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => v+' launches' } } }
+      }
+    });
+  },
+  () => {
+    new Chart(C('marketShareChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['SpaceX','China (CASC/LandSpace)','Rocket Lab','ULA/Others US','Global Others'],
+        datasets: [{
+          data: [67, 17, 5, 5, 6],
+          backgroundColor: [COLORS.blue, COLORS.red, COLORS.green, COLORS.purple, COLORS.muted],
+          borderColor: '#111318', borderWidth: 3,
+        }]
+      },
+      options: { ...DEF, scales: {}, cutout: '65%',
+        plugins: { ...DEF.plugins, legend: { display: false } }
+      }
+    });
+  },
+  () => {
+    new Chart(C('costKgChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Space Shuttle\n(1981)', 'Ariane 5\n(2002)', 'Atlas V\n(2002)', 'Falcon 9\n(2010)', 'Falcon 9 Reuse\n(2017)', 'Starship\n(Goal)'],
+        datasets: [{
+          label: '$/kg to LEO',
+          data: [54500, 11000, 13000, 5500, 2700, 100],
+          backgroundColor: [COLORS.red, COLORS.amber, COLORS.amber, COLORS.blue15, COLORS.blue, COLORS.green],
+          borderColor: [COLORS.red, COLORS.amber, COLORS.amber, COLORS.blue, COLORS.blue, COLORS.green],
+          borderWidth: 1, borderRadius: 4,
+        }]
+      },
+      options: { ...DEF, plugins: { ...DEF.plugins, legend: { display: false } },
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y,
+          type: 'logarithmic',
+          ticks: { ...DEF.scales.y.ticks, callback: v => '$'+v.toLocaleString() }
+        } }
+      }
+    });
+  },
+  () => {
+    new Chart(C('custTypeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Starlink Internal', 'US Government (NASA/DoD)', 'Commercial Sat', 'Rideshare', 'Foreign Gov'],
+        datasets: [{
+          data: [68, 14, 10, 6, 2],
+          backgroundColor: [COLORS.green, COLORS.blue, COLORS.amber, COLORS.purple, COLORS.muted],
+          borderColor: '#111318', borderWidth: 3,
+        }]
+      },
+      options: { ...DEF, scales: {}, cutout: '60%',
+        plugins: { ...DEF.plugins, legend: { position: 'right', labels: { color: '#94a3b8', font: {size: 11}, boxWidth: 10, padding: 8 } } }
+      }
+    });
+  }
+];
+
+// ── MOAT charts (no canvas charts in this section) ─────────────
+chartFns['moat'] = [];
+
+// ── COMPETITORS charts ─────────────────────────────────────────
+chartFns['competitors'] = [
+  () => {
+    new Chart(C('radarChart'), {
+      type: 'radar',
+      data: {
+        labels: ['Launch Cost','Reliability','Cadence','Reusability','Human Spaceflight','Satellite Internet','R&D Budget','Customer Base'],
+        datasets: [
+          { label: 'SpaceX',      data: [98, 99, 99, 95, 95, 98, 95, 95],
+            borderColor: COLORS.blue, backgroundColor: COLORS.blue15, pointBackgroundColor: COLORS.blue },
+          { label: 'Blue Origin', data: [50, 60, 20, 40, 30, 15, 70, 25],
+            borderColor: COLORS.amber, backgroundColor: COLORS.amber15, pointBackgroundColor: COLORS.amber },
+          { label: 'China (CASC)',data: [75, 85, 80, 30, 70, 20, 85, 60],
+            borderColor: COLORS.red, backgroundColor: COLORS.red15, pointBackgroundColor: COLORS.red },
+          { label: 'Rocket Lab',  data: [40, 92, 45, 35, 0, 0, 30, 40],
+            borderColor: COLORS.green, backgroundColor: COLORS.green15, pointBackgroundColor: COLORS.green },
+        ]
+      },
+      options: { ...DEF, scales: {
+        r: { grid: { color: 'rgba(255,255,255,0.08)' }, pointLabels: { color: '#94a3b8', font: {size: 11} },
+             ticks: { color: '#64748b', font: {size: 9}, backdropColor: 'transparent' },
+             angleLines: { color: 'rgba(255,255,255,0.08)' } }
+      }}
+    });
+  }
+];
+
+// ── STARLINK charts ────────────────────────────────────────────
+chartFns['starlink'] = [
+  () => {
+    new Chart(C('slSubsChart'), {
+      type: 'line',
+      data: {
+        labels: ['Q1 2021','Q3 2021','Q1 2022','Q3 2022','Q1 2023','Q3 2023','Q1 2024','Q3 2024','Q1 2025','2026F','2027F','2028F'],
+        datasets: [{
+          label: 'Subscribers (M)',
+          data: [0.07, 0.1, 0.25, 0.5, 1.0, 1.8, 2.6, 3.7, 4.6, 7.0, 12.0, 20.0],
+          borderColor: COLORS.green, backgroundColor: COLORS.green15,
+          fill: true, tension: 0.4, pointBackgroundColor: COLORS.green,
+        }]
+      },
+      options: { ...DEF, scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => v+'M' } } } }
+    });
+  },
+  () => {
+    new Chart(C('slRevChart'), {
+      type: 'bar',
+      data: {
+        labels: ['2021','2022','2023','2024E','2025F','2026F','2027F','2028F'],
+        datasets: [
+          { label: 'Consumer', data: [0.1, 0.8, 2.8, 4.2, 6.5, 10.0, 15.0, 22.0],
+            backgroundColor: COLORS.green, borderRadius: 4 },
+          { label: 'Maritime/Aviation', data: [0, 0.1, 0.4, 1.0, 2.0, 4.0, 6.0, 9.0],
+            backgroundColor: COLORS.blue, borderRadius: 4 },
+          { label: 'Government/Military', data: [0, 0.1, 0.3, 0.9, 1.8, 3.5, 5.5, 8.0],
+            backgroundColor: COLORS.amber, borderRadius: 4 },
+        ]
+      },
+      options: { ...DEF,
+        scales: {
+          x: DEF.scales.x,
+          y: { ...DEF.scales.y, stacked: true, ticks: { ...DEF.scales.y.ticks, callback: v => '$'+v+'B' } }
+        }
+      }
+    });
+  }
+];
+
+// ── STARSHIP charts ────────────────────────────────────────────
+chartFns['starship'] = [
+  () => {
+    new Chart(C('rocketCompChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Saturn V\n(1967)', 'Space Shuttle\n(1981)', 'Falcon Heavy\n(2018)', 'SLS Block 1\n(2022)', 'Starship\n(2024+)'],
+        datasets: [{
+          label: 'Payload to LEO (tonnes)',
+          data: [130, 24.4, 63.8, 95, 150],
+          backgroundColor: ['rgba(245,158,11,0.4)', 'rgba(100,116,139,0.4)', 'rgba(79,142,247,0.4)', 'rgba(123,92,240,0.4)', 'rgba(34,197,94,0.7)'],
+          borderColor: [COLORS.amber, COLORS.muted, COLORS.blue, COLORS.purple, COLORS.green],
+          borderWidth: 2, borderRadius: 6,
+        }]
+      },
+      options: { ...DEF, plugins: { ...DEF.plugins, legend: { display: false } },
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => v+'t' } } }
+      }
+    });
+  }
+];
+
+// ── RISKS charts ───────────────────────────────────────────────
+chartFns['risks'] = [
+  () => {
+    new Chart(C('riskBubbleChart'), {
+      type: 'bubble',
+      data: {
+        datasets: [
+          { label: 'Musk Key-Person', data: [{x: 6, y: 9.5, r: 18}], backgroundColor: 'rgba(239,68,68,0.6)' },
+          { label: 'Musk Political', data: [{x: 7, y: 8.5, r: 16}], backgroundColor: 'rgba(239,68,68,0.4)' },
+          { label: 'Starship Failure', data: [{x: 4, y: 9, r: 15}], backgroundColor: 'rgba(245,158,11,0.6)' },
+          { label: 'FAA Block', data: [{x: 6, y: 7.5, r: 12}], backgroundColor: 'rgba(245,158,11,0.5)' },
+          { label: 'Kuiper Competition', data: [{x: 4, y: 6.5, r: 10}], backgroundColor: 'rgba(79,142,247,0.5)' },
+          { label: 'China Competition', data: [{x: 3, y: 6, r: 10}], backgroundColor: 'rgba(239,68,68,0.3)' },
+          { label: 'NASA Budget Cuts', data: [{x: 3, y: 5, r: 8}], backgroundColor: 'rgba(34,197,94,0.5)' },
+          { label: 'Valuation Inflation', data: [{x: 7, y: 5, r: 10}], backgroundColor: 'rgba(123,92,240,0.5)' },
+          { label: 'Spectrum Disputes', data: [{x: 5, y: 3.5, r: 7}], backgroundColor: 'rgba(100,116,139,0.5)' },
+        ]
+      },
+      options: { ...DEF,
+        scales: {
+          x: { ...DEF.scales.x, min: 0, max: 10, title: { display: true, text: 'Probability →', color: '#64748b' } },
+          y: { ...DEF.scales.y, min: 0, max: 10, title: { display: true, text: 'Impact →', color: '#64748b' } }
+        },
+        plugins: { ...DEF.plugins, legend: { display: true, position: 'right', labels: { color: '#94a3b8', font: {size: 10}, boxWidth: 8, padding: 6 } } }
+      }
+    });
+  },
+  () => {
+    new Chart(C('sensitivityChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Starlink: +10M subs', 'Starship ops 2026', 'Starlink IPO', 'DoD contracts +50%', 'Base Case', 'Musk exits', 'Starship 2yr delay', 'Fatal accident', 'Kuiper gains 20M subs'],
+        datasets: [{
+          label: 'Valuation Impact ($B)',
+          data: [180, 250, 200, 80, 0, -150, -100, -200, -60],
+          backgroundColor: d => d.raw > 0 ? COLORS.green : COLORS.red,
+          borderRadius: 4,
+        }]
+      },
+      options: { ...DEF, indexAxis: 'y',
+        plugins: { ...DEF.plugins, legend: { display: false } },
+        scales: {
+          x: { ...DEF.scales.x, ticks: { ...DEF.scales.x.ticks, callback: v => (v>=0?'+':'')+v+'B' } },
+          y: DEF.scales.y
+        }
+      }
+    });
+  }
+];
+
+// ── IPO charts ─────────────────────────────────────────────────
+chartFns['ipo'] = [
+  () => {
+    new Chart(C('ipoValChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Bear\n(10× P/S)', 'Base Low\n(15× P/S)', 'Base Mid\n(20× P/S)', 'Base High\n(25× P/S)', 'Bull\n(35× P/S)', 'Ultra Bull\n(50× P/S)', 'Full SpaceX\n$2T Target'],
+        datasets: [{
+          label: 'Valuation ($B)',
+          data: [90, 135, 180, 225, 315, 450, 2000],
+          backgroundColor: [COLORS.red, COLORS.amber, COLORS.blue15, COLORS.blue, COLORS.green, 'rgba(34,197,94,0.8)', 'rgba(123,92,240,0.8)'],
+          borderColor: [COLORS.red, COLORS.amber, COLORS.blue, COLORS.blue, COLORS.green, COLORS.green, COLORS.purple],
+          borderWidth: 1, borderRadius: 6,
+        }]
+      },
+      options: { ...DEF, plugins: { ...DEF.plugins, legend: { display: false },
+        annotation: {} },
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => '$'+v+'B' } } }
+      }
+    });
+  },
+  () => {
+    new Chart(C('spaceStockChart'), {
+      type: 'line',
+      data: {
+        labels: ['IPO Day', '+1M', '+3M', '+6M', '+12M', '+18M', '+24M', '+36M'],
+        datasets: [
+          { label: 'Virgin Galactic (SPCE SPAC 2019)', data: [100, 280, 420, 180, 220, 150, 80, 15],
+            borderColor: COLORS.red, backgroundColor: 'transparent', tension: 0.4, pointRadius: 3 },
+          { label: 'Rocket Lab (RKLB SPAC 2021)', data: [100, 125, 95, 70, 55, 65, 80, 95],
+            borderColor: COLORS.amber, backgroundColor: 'transparent', tension: 0.4, pointRadius: 3 },
+          { label: 'Astra Space (ASTR SPAC 2021)', data: [100, 180, 120, 60, 20, 5, 2, 1],
+            borderColor: COLORS.muted, backgroundColor: 'transparent', tension: 0.4, pointRadius: 3, borderDash: [4,4] },
+          { label: 'Hypothetical Starlink (illustrative)', data: [100, 115, 105, 95, 140, 165, 200, 280],
+            borderColor: COLORS.green, backgroundColor: COLORS.green15, fill: true, tension: 0.4, pointRadius: 3, borderDash: [8,4] },
+        ]
+      },
+      options: { ...DEF,
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => v } } }
+      }
+    });
+  }
+];
+
+// ── VERDICT charts ─────────────────────────────────────────────
+chartFns['verdict'] = [
+  () => {
+    new Chart(C('ipoReturnChart'), {
+      type: 'bar',
+      data: {
+        labels: ['$80B entry','$120B entry','$150B entry','$180B entry','$220B entry','$280B entry','$350B entry','$450B entry','$350B→$2T\n(Musk target)'],
+        datasets: [
+          { label: 'Bear Case IRR (%)',   data: [-8, -5, -3, -1, -4, -8, -12, -18, null],
+            backgroundColor: COLORS.red15, borderColor: COLORS.red, borderWidth: 1, borderRadius: 4 },
+          { label: 'Base Case IRR (%)',   data: [38, 29, 24, 20, 15, 10, 6, 2, null],
+            backgroundColor: COLORS.blue15, borderColor: COLORS.blue, borderWidth: 1, borderRadius: 4 },
+          { label: 'Bull Case IRR (%)',   data: [65, 52, 45, 38, 30, 22, 16, 10, null],
+            backgroundColor: COLORS.green15, borderColor: COLORS.green, borderWidth: 1, borderRadius: 4 },
+          { label: '$350B→$2T IRR (~28% p.a. over 7yrs)', data: [null,null,null,null,null,null,null,null, 28],
+            backgroundColor: 'rgba(123,92,240,0.5)', borderColor: COLORS.purple, borderWidth: 2, borderRadius: 4 },
+        ]
+      },
+      options: { ...DEF,
+        scales: { x: DEF.scales.x, y: { ...DEF.scales.y, ticks: { ...DEF.scales.y.ticks, callback: v => v+'%' } } }
+      }
+    });
+  },
+  () => {
+    new Chart(C('ipoCompChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Meta (2012)', 'Google (2004)', 'Amazon (1997)', 'Airbnb (2020)', 'Snowflake (2020)', 'Uber (2019)', 'Lyft (2019)'],
+        datasets: [{
+          label: '5-Year Return from IPO (%)',
+          data: [420, 1100, 1800, 210, 85, -25, -60],
+          backgroundColor: d => d.raw > 0 ? COLORS.green : COLORS.red,
+          borderRadius: 4,
+        }]
+      },
+      options: { ...DEF, indexAxis: 'y',
+        plugins: { ...DEF.plugins, legend: { display: false } },
+        scales: {
+          x: { ...DEF.scales.x, ticks: { ...DEF.scales.x.ticks, callback: v => v+'%' } },
+          y: DEF.scales.y
+        }
+      }
+    });
+  }
+];
+
+// ── TIMELINE (no charts) ───────────────────────────────────────
+chartFns['timeline'] = [];
+
+// Init overview on load
+window.addEventListener('load', () => {
+  renderChartsFor('overview');
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════ SOURCES MODAL ═══ -->
+<div id="srcModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;overflow-y:auto;padding:40px 20px">
+  <div style="max-width:860px;margin:0 auto;background:#111318;border:1px solid #1e2330;border-radius:16px;padding:36px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h2 style="color:#f8fafc;font-size:20px">Sources & Data Methodology</h2>
+      <button onclick="document.getElementById('srcModal').style.display='none'" style="background:none;border:1px solid #1e2330;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px">Close ✕</button>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;line-height:1.9">
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:14px;margin-bottom:20px;color:#f59e0b">
+        <strong>Important Disclaimer:</strong> SpaceX is a private company and does not publish audited financial statements. All revenue, EBITDA, and segment figures are analyst estimates reconstructed from public data sources. Forward projections are speculative. This report is for informational purposes only and does not constitute investment advice.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div>
+          <div style="color:#e2e8f0;font-weight:700;margin-bottom:10px;font-size:13px">Valuation & Funding Data</div>
+          <ul style="list-style:none;padding:0">
+            <li>• <strong style="color:#e2e8f0">$350B valuation (Dec 2024):</strong> Bloomberg, Reuters — SpaceX tender offer at ~$255/share implied $350B</li>
+            <li>• <strong style="color:#e2e8f0">Prior funding rounds:</strong> SEC Form D filings, Crunchbase, PitchBook verified rounds</li>
+            <li>• <strong style="color:#e2e8f0">$137B (Jun 2023):</strong> Bloomberg, Reuters reporting on internal secondary sale</li>
+          </ul>
+        </div>
+        <div>
+          <div style="color:#e2e8f0;font-weight:700;margin-bottom:10px;font-size:13px">Revenue Estimates</div>
+          <ul style="list-style:none;padding:0">
+            <li>• <strong style="color:#e2e8f0">2022 revenue ~$6B:</strong> Wall Street Journal reporting (Mar 2023)</li>
+            <li>• <strong style="color:#e2e8f0">2023 revenue ~$9.6B:</strong> Morgan Stanley Space Team estimate; Quilty Analytics</li>
+            <li>• <strong style="color:#e2e8f0">2024E ~$13.1B:</strong> Goldman Sachs, Morgan Stanley analyst estimates (range: $11–15B)</li>
+            <li>• <strong style="color:#e2e8f0">Segment split:</strong> Modelled from Starlink sub counts × ARPU + government contract filings</li>
+          </ul>
+        </div>
+        <div>
+          <div style="color:#e2e8f0;font-weight:700;margin-bottom:10px;font-size:13px">Launch Data</div>
+          <ul style="list-style:none;padding:0">
+            <li>• <strong style="color:#e2e8f0">2024 launches (134):</strong> BryceTech "2024 Global Space Launch Report"; SpaceflightNow manifest</li>
+            <li>• <strong style="color:#e2e8f0">China launches (68 in 2024):</strong> BryceTech; Gunter's Space Page verified manifest</li>
+            <li>• <strong style="color:#e2e8f0">Market share 67%:</strong> BryceTech orbital launch report by payload mass & count</li>
+            <li>• <strong style="color:#e2e8f0">Cost/kg estimates:</strong> SpaceX price guide (public); NASA cost-per-flight studies; Futron Corp analysis</li>
+            <li>• <strong style="color:#e2e8f0">Falcon 9 reliability 99.3%:</strong> Based on 344 consecutive successes post-CRS-7 (June 2015). Note: Amos-6 (Sep 2016) was a ground static-fire explosion, NOT a flight failure.</li>
+          </ul>
+        </div>
+        <div>
+          <div style="color:#e2e8f0;font-weight:700;margin-bottom:10px;font-size:13px">Starlink Data</div>
+          <ul style="list-style:none;padding:0">
+            <li>• <strong style="color:#e2e8f0">4M+ subscribers (Nov 2024):</strong> SpaceX confirmed via Elon Musk X post, Nov 2024</li>
+            <li>• <strong style="color:#e2e8f0">~6,700 satellites:</strong> Space-Track.org (USSPACECOM catalog), May 2025</li>
+            <li>• <strong style="color:#e2e8f0">100+ countries:</strong> Starlink.com availability map (public)</li>
+            <li>• <strong style="color:#e2e8f0">~25ms latency:</strong> SpeedTest.net Starlink benchmarks; Ookla Global Index 2024</li>
+            <li>• <strong style="color:#e2e8f0">ARPU ~$110/mo:</strong> Estimated from public pricing tiers weighted by subscriber mix</li>
+          </ul>
+        </div>
+        <div>
+          <div style="color:#e2e8f0;font-weight:700;margin-bottom:10px;font-size:13px">Government Contracts</div>
+          <ul style="list-style:none;padding:0">
+            <li>• <strong style="color:#e2e8f0">NASA HLS $2.89B:</strong> NASA press release Apr 2021; Modification to $2.89B confirmed Jul 2021</li>
+            <li>• <strong style="color:#e2e8f0">Commercial Crew $2.6B:</strong> NASA CCP contract award, Sep 2014 (public NASA document)</li>
+            <li>• <strong style="color:#e2e8f0">CRS-2 ~$1.6B:</strong> NASA OIG report 2019; USASpending.gov contract award</li>
+            <li>• <strong style="color:#e2e8f0">Starshield $1.8B+:</strong> DoD SBIR/Other Transaction Authority filings; Defense News reporting 2023–24</li>
+            <li>• <strong style="color:#e2e8f0">NRO classified contracts:</strong> Estimated from public budget documents; exact value classified</li>
+          </ul>
+        </div>
+        <div>
+          <div style="color:#e2e8f0;font-weight:700;margin-bottom:10px;font-size:13px">Starship Technical Data</div>
+          <ul style="list-style:none;padding:0">
+            <li>• <strong style="color:#e2e8f0">Height 121m:</strong> SpaceX technical specifications (public)</li>
+            <li>• <strong style="color:#e2e8f0">150t to LEO:</strong> SpaceX published capability (expendable); ~100–120t reusable estimated</li>
+            <li>• <strong style="color:#e2e8f0">33+6 Raptor engines:</strong> SpaceX confirmed configuration (public updates)</li>
+            <li>• <strong style="color:#e2e8f0">IFT dates:</strong> SpaceX official press kits; FAA launch windows public record</li>
+            <li>• <strong style="color:#e2e8f0">Rocket comparison (LEO capacity):</strong> NASA/USAF published specifications</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1e2330;color:#64748b">
+        <strong style="color:#94a3b8">Primary Research Sources:</strong> BryceTech Space Reports (2022–2025) · Morgan Stanley Global Space Team · Goldman Sachs Equity Research · Quilty Analytics · NASA OIG Reports · USASpending.gov · SpaceflightNow Launch Log · Gunter's Space Page · Space-Track.org · Bloomberg / Reuters / WSJ original reporting · SpaceX press kits and X posts (Elon Musk / SpaceX verified accounts) · FAA environmental review documents · SEC EDGAR (funding filings)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCES BUTTON (fixed bottom-right) -->
+<button onclick="document.getElementById('srcModal').style.display='block'"
+  style="position:fixed;bottom:24px;right:24px;background:#1e2330;border:1px solid #2d3748;color:#94a3b8;padding:10px 18px;border-radius:8px;font-size:12px;cursor:pointer;z-index:100;transition:all 0.2s;font-family:inherit"
+  onmouseover="this.style.borderColor='#4f8ef7';this.style.color='#4f8ef7'"
+  onmouseout="this.style.borderColor='#2d3748';this.style.color='#94a3b8'">
+  📋 Sources & Methodology
+</button>
+
+</body>
+</html>

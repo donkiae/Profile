@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF → Excel Converter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.09);
+      padding: 2.75rem;
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .header { margin-bottom: 2rem; }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .header p {
+      margin-top: 0.4rem;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* Drop zone */
+    .dropzone {
+      position: relative;
+      border: 2px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .dropzone:hover, .dropzone.over {
+      border-color: #3b82f6;
+      background: #f0f7ff;
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 2.25rem;
+      margin-bottom: 0.75rem;
+      line-height: 1;
+    }
+
+    .drop-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .drop-hint {
+      margin-top: 0.3rem;
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    /* File list */
+    .file-list {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.875rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 9px;
+      animation: slideIn 0.15s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .pdf-icon {
+      width: 30px;
+      height: 30px;
+      background: #fee2e2;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #dc2626;
+      flex-shrink: 0;
+      letter-spacing: -0.03em;
+    }
+
+    .file-info { flex: 1; min-width: 0; }
+
+    .file-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #cbd5e1;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .remove-btn:hover { color: #ef4444; }
+
+    /* Convert button */
+    .convert-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.9rem;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: 11px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .convert-btn:hover:not(:disabled) { background: #1e40af; }
+    .convert-btn:active:not(:disabled) { transform: scale(0.985); }
+    .convert-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+      width: 17px;
+      height: 17px;
+      border: 2.5px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status */
+    .status {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status.success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      display: block;
+    }
+
+    .download-link {
+      margin-left: auto;
+      color: #1d4ed8;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .download-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>PDF → Excel <span class="badge">Converter</span></h1>
+      <p>Drop bank statements or trade reports to extract tables into Excel sheets</p>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept=".pdf" multiple>
+      <div class="drop-icon">📂</div>
+      <p class="drop-label">Drop PDFs here</p>
+      <p class="drop-hint">or click to browse &nbsp;·&nbsp; multiple files supported</p>
+    </div>
+
+    <div class="file-list" id="fileList"></div>
+
+    <button class="convert-btn" id="convertBtn" disabled>
+      Convert to Excel
+    </button>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const dropzone   = document.getElementById('dropzone');
+    const fileInput  = document.getElementById('fileInput');
+    const fileList   = document.getElementById('fileList');
+    const convertBtn = document.getElementById('convertBtn');
+    const statusEl   = document.getElementById('status');
+
+    let files = [];
+
+    function fmt(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function render() {
+      fileList.innerHTML = '';
+      files.forEach((f, i) => {
+        const el = document.createElement('div');
+        el.className = 'file-item';
+        el.innerHTML = `
+          <div class="pdf-icon">PDF</div>
+          <div class="file-info">
+            <div class="file-name" title="${f.name}">${f.name}</div>
+            <div class="file-size">${fmt(f.size)}</div>
+          </div>
+          <button class="remove-btn" data-i="${i}" title="Remove">✕</button>
+        `;
+        fileList.appendChild(el);
+      });
+      convertBtn.disabled = files.length === 0;
+      statusEl.style.display = 'none';
+      statusEl.className = 'status';
+
+      fileList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          files.splice(+btn.dataset.i, 1);
+          render();
+        });
+      });
+    }
+
+    function addFiles(incoming) {
+      for (const f of incoming) {
+        if ((f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))
+            && !files.find(x => x.name === f.name && x.size === f.size)) {
+          files.push(f);
+        }
+      }
+      render();
+    }
+
+    fileInput.addEventListener('change', e => { addFiles(e.target.files); fileInput.value = ''; });
+
+    dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('over');
+      addFiles(e.dataTransfer.files);
+    });
+
+    convertBtn.addEventListener('click', async () => {
+      if (!files.length) return;
+
+      convertBtn.disabled = true;
+      convertBtn.innerHTML = '<div class="spinner"></div> Converting…';
+      statusEl.style.display = 'none';
+
+      const fd = new FormData();
+      files.forEach(f => fd.append('files', f));
+
+      try {
+        const base = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
+        const res = await fetch(base + '/convert', { method: 'POST', body: fd });
+
+        if (!res.ok) {
+          const raw = await res.text();
+          let msg;
+          try { msg = JSON.parse(raw).detail; } catch { msg = raw; }
+          throw new Error(msg || `Server error ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const cd   = res.headers.get('content-disposition') || '';
+        const name = cd.match(/filename="?([^";\n]+)"?/)?.[1] || 'converted.xlsx';
+
+        statusEl.className = 'status success';
+        statusEl.style.display = 'flex';
+        statusEl.innerHTML = `<span>✅ Done — ${files.length} file${files.length > 1 ? 's' : ''} converted</span>
+          <a class="download-link" href="${url}" download="${name}">⬇ Download Excel</a>`;
+
+      } catch (err) {
+        statusEl.className = 'status error';
+        statusEl.style.display = 'block';
+        statusEl.textContent = '❌ ' + err.message;
+      } finally {
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = 'Convert to Excel';
+      }
+    });
+  </script>
+</body>
+</html>

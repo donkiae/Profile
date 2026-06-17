@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jade Tan — Portfolio</title>
+<style>
+:root {
+  --bg:#faf8f5; --surface:#ffffff; --surface2:#f0ebe3; --border:#e5ddd3;
+  --accent:#2563eb; --accent2:#7c3aed; --green:#16a34a; --amber:#d97706;
+  --red:#dc2626; --text:#292524; --muted:#78716c; --white:#0c0a09;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.6;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:58px;background:rgba(250,248,245,0.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-logo{font-size:15px;font-weight:700;color:var(--white);letter-spacing:-.3px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.nav-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;}
+.nav-links{display:flex;gap:2px;}
+.nav-links a{color:var(--muted);text-decoration:none;padding:6px 13px;border-radius:6px;font-size:13px;transition:color .2s,background .2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--text);background:var(--surface2);}
+.nav-cta{background:var(--accent)!important;color:#fff!important;font-weight:600!important;border-radius:7px!important;}
+.nav-cta:hover{background:#1d4ed8!important;}
+@media(max-width:680px){nav{padding:0 20px;}.nav-links{display:none;}}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;padding:100px 80px 60px;}
+.hero-layout{display:grid;grid-template-columns:1fr 300px;gap:64px;align-items:center;width:100%;}
+.hero-left{display:flex;flex-direction:column;}
+.hero-card-aside{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;flex-direction:column;}
+.hc-item{padding:13px 0;border-bottom:1px solid var(--border);}
+.hc-item:first-child{padding-top:0;}
+.hc-item:last-child{border-bottom:none;padding-bottom:0;}
+.hc-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.hc-val{font-size:13px;font-weight:600;color:var(--white);line-height:1.5;}
+.hc-sub{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.hc-open{display:inline-flex;align-items:center;gap:5px;background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid rgba(22,163,74,.2);}
+.hc-open::before{content:'';width:5px;height:5px;background:#16a34a;border-radius:50%;display:inline-block;}
+@media(max-width:960px){.hero-layout{grid-template-columns:1fr;}.hero-card-aside{display:none;}}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:5px 13px;border-radius:20px;margin-bottom:26px;}
+.hero-pill::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;}
+.hero-name{font-size:clamp(40px,6vw,74px);font-weight:800;line-height:1.08;letter-spacing:-2.5px;color:var(--white);margin-bottom:10px;}
+.hero-name span{color:var(--accent);}
+.hero-contact{font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:.1px;}
+.hero-role{font-size:clamp(15px,2.2vw,20px);color:var(--muted);margin-bottom:18px;letter-spacing:-.2px;}
+.hero-desc{max-width:540px;color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:36px;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-pri{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s,transform .15s;display:inline-flex;align-items:center;gap:7px;}
+.btn-pri:hover{background:#1d4ed8;transform:translateY(-1px);}
+.btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:12px 28px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:border-color .2s,color .2s,transform .15s;display:inline-flex;align-items:center;gap:7px;}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);}
+.hero-stats{display:flex;gap:44px;margin-top:52px;padding-top:40px;border-top:1px solid var(--border);}
+.h-stat-n{font-size:26px;font-weight:700;color:var(--white);letter-spacing:-1px;}
+.h-stat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;}
+@media(max-width:680px){#hero{padding:90px 24px 48px;}.hero-stats{gap:22px;flex-wrap:wrap;}}
+
+/* ── SHARED ── */
+section{padding:88px 80px;}
+@media(max-width:680px){section{padding:64px 24px;}}
+.s-label{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:9px;}
+.s-title{font-size:clamp(22px,3vw,34px);font-weight:700;color:var(--white);letter-spacing:-.5px;margin-bottom:8px;}
+.s-sub{color:var(--muted);font-size:15px;margin-bottom:44px;max-width:500px;}
+.divider{height:1px;background:var(--border);margin:0 80px;}
+@media(max-width:680px){.divider{margin:0 24px;}}
+.fade-in{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+
+/* ── FEATURED WORK ── */
+#work{background:#eef4ff;}
+#experience{background:var(--surface);}
+#community{background:#f5f3ff;}
+#skills{background:#eef4ff;}
+.featured-project{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;margin-bottom:72px;}
+.featured-project:last-child{margin-bottom:0;}
+.featured-project.rev{direction:rtl;}
+.featured-project.rev > *{direction:ltr;}
+@media(max-width:960px){.featured-project,.featured-project.rev{grid-template-columns:1fr;direction:ltr;}.featured-project.rev>.preview-wrap{order:1;}}
+.fp-meta{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.fp-num{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;}
+.fp-status{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;}
+.fp-status.live{background:rgba(22,163,74,.1);color:#15803d;border:1px solid rgba(22,163,74,.25);}
+.fp-status.built{background:rgba(37,99,235,.1);color:#1d4ed8;border:1px solid rgba(37,99,235,.25);}
+.fp-status.research{background:rgba(180,83,9,.1);color:#b45309;border:1px solid rgba(180,83,9,.25);}
+.fp-title{font-size:22px;font-weight:700;color:var(--white);letter-spacing:-.4px;margin-bottom:10px;}
+.fp-desc{color:var(--muted);font-size:14px;line-height:1.75;margin-bottom:18px;}
+.fp-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.tag{font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 10px;border-radius:5px;}
+.tag.py{background:rgba(37,99,235,.08);color:#1d4ed8;border:1px solid rgba(37,99,235,.2);}
+.tag.ai{background:rgba(124,58,237,.08);color:#6d28d9;border:1px solid rgba(124,58,237,.2);}
+.tag.az{background:rgba(3,105,161,.08);color:#0369a1;border:1px solid rgba(3,105,161,.2);}
+.tag.web{background:rgba(22,163,74,.08);color:#15803d;border:1px solid rgba(22,163,74,.2);}
+.tag.data{background:rgba(180,83,9,.08);color:#b45309;border:1px solid rgba(180,83,9,.2);}
+.tag.mob{background:rgba(185,28,28,.08);color:#b91c1c;border:1px solid rgba(185,28,28,.2);}
+.fp-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.detail-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;padding:9px 18px;border-radius:7px;border:1px solid var(--border);cursor:default;}
+
+/* ── PREVIEW WINDOW ── */
+.preview-wrap{position:relative;}
+.browser-chrome{background:#1a1e28;border:1px solid #2a3040;border-radius:12px;overflow:hidden;box-shadow:0 20px 48px rgba(0,0,0,.18);}
+.browser-bar{background:#151820;padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2a3040;}
+.browser-dots{display:flex;gap:6px;}
+.browser-dot{width:10px;height:10px;border-radius:50%;}
+.bd-r{background:#ff5f57;} .bd-y{background:#febc2e;} .bd-g{background:#28c840;}
+.browser-url{flex:1;background:#0d1015;border-radius:5px;padding:4px 10px;font-size:10px;color:#4a5568;font-family:monospace;}
+.preview-body{overflow:hidden;max-height:320px;position:relative;}
+.preview-body::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,#1a1e28);pointer-events:none;}
+/* Dark dashboard skin for mockups — kept dark intentionally */
+.db{background:#0d1117;padding:14px;font-family:'Segoe UI',sans-serif;font-size:11px;color:#e6edf3;min-height:300px;}
+.db-h1{font-size:16px;font-weight:700;color:#58a6ff;margin-bottom:3px;}
+.db-sub{color:#8b949e;font-size:9.5px;margin-bottom:14px;}
+.db-sbar{display:flex;gap:14px;background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px 14px;margin-bottom:14px;flex-wrap:wrap;}
+.db-stat{text-align:center;} .db-stat-v{font-size:18px;font-weight:700;} .db-stat-l{font-size:8px;color:#8b949e;text-transform:uppercase;}
+.db-stat-v.green{color:#3fb950;} .db-stat-v.red{color:#f85149;} .db-stat-v.orange{color:#f0883e;}
+.db-sec{font-size:8.5px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #21262d;padding-bottom:4px;margin:10px 0 8px;}
+.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.db-card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;position:relative;}
+.db-card.hold{border-left:3px solid #8b949e;} .db-card.buy{border-left:3px solid #3fb950;}
+.db-sym{font-size:12px;font-weight:700;}
+.db-prow{display:flex;align-items:baseline;gap:6px;margin:3px 0;}
+.db-price{font-size:13px;font-weight:700;} .db-chg{font-size:9.5px;font-weight:600;}
+.db-chg.down{color:#f85149;} .db-chg.up{color:#3fb950;}
+.db-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:8.5px;font-weight:700;margin:3px 2px 3px 0;}
+.db-badge.HOLD{background:#21262d;color:#8b949e;} .db-badge.WAIT{background:#21262d;color:#e6edf3;} .db-badge.BUY{background:#1a3a21;color:#3fb950;}
+.db-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:5px 0;}
+.db-lvl{background:#0d1117;border-radius:4px;padding:4px 5px;text-align:center;}
+.db-lvl-l{font-size:7px;color:#8b949e;text-transform:uppercase;}
+.db-lvl-v{font-size:9px;font-weight:700;}
+.entry-c{color:#58a6ff;} .tgt-c{color:#3fb950;} .stop-c{color:#f85149;}
+.db-risk{display:flex;align-items:center;gap:5px;margin:4px 0;font-size:8px;}
+.risk-high{background:#3d1a1a;color:#f85149;padding:1px 5px;border-radius:3px;font-weight:700;}
+.db-sig{background:#0d1117;border-radius:4px;padding:5px 7px;font-size:7.5px;color:#c9d1d9;line-height:1.6;margin:4px 0;}
+.db-sig::before{content:'· ';color:#58a6ff;}
+.bf-mkt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px;}
+.bf-tile{background:#161b22;border:1px solid #21262d;border-radius:7px;padding:7px 8px;}
+.bf-tile.up{border-left:3px solid #3fb950;} .bf-tile.dn{border-left:3px solid #f85149;}
+.bf-flag{font-size:13px;} .bf-name{font-size:7.5px;color:#8b949e;} .bf-close{font-size:11px;font-weight:700;margin:2px 0;} .bf-chg{font-size:8.5px;font-weight:600;}
+.bf-news{background:#161b22;border:1px solid #21262d;border-radius:7px;padding:8px;margin-bottom:6px;}
+.bf-news-meta{display:flex;gap:4px;align-items:center;margin-bottom:4px;}
+.src-bloomberg{background:#1e2d40;color:#58a6ff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;}
+.bf-region{background:#0d1117;color:#8b949e;font-size:7px;padding:1px 5px;border-radius:3px;}
+.bf-headline{font-size:9px;font-weight:700;color:#e6edf3;line-height:1.4;margin-bottom:3px;}
+.bf-why{font-size:7.5px;color:#8b949e;line-height:1.5;}
+.bf-why::before{content:'WHY: ';color:#58a6ff;font-weight:700;}
+.sx-bar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.sx-stat{background:#161b22;border:1px solid #21262d;border-radius:7px;padding:7px 10px;text-align:center;}
+.sx-stat-v{font-size:16px;font-weight:700;color:#58a6ff;} .sx-stat-l{font-size:7px;color:#8b949e;text-transform:uppercase;}
+.sx-chart-fake{background:#161b22;border:1px solid #21262d;border-radius:7px;padding:10px;height:90px;position:relative;overflow:hidden;}
+.sx-bars{position:absolute;bottom:15px;left:10px;right:10px;display:flex;align-items:flex-end;gap:4px;height:60px;}
+.sx-bar-item{flex:1;background:linear-gradient(180deg,rgba(79,142,247,.6),rgba(79,142,247,.2));border-radius:2px 2px 0 0;}
+.pdf-card{background:#ffffff;border-radius:10px;padding:18px;color:#0f172a;}
+.pdf-h1{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:3px;}
+.pdf-sub{font-size:8.5px;color:#64748b;margin-bottom:12px;}
+.pdf-drop{border:2px dashed #cbd5e1;border-radius:9px;padding:16px;text-align:center;background:#f8fafc;}
+.pdf-drop-icon{font-size:22px;margin-bottom:5px;}
+.pdf-drop-label{font-size:9.5px;font-weight:600;color:#334155;}
+.pdf-file{display:flex;align-items:center;gap:7px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;margin-top:8px;}
+.pdf-icon{width:22px;height:22px;background:#fee2e2;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#dc2626;}
+.pdf-fname{font-size:8.5px;font-weight:600;color:#1e293b;}
+.pdf-fsize{font-size:7px;color:#94a3b8;}
+.pdf-btn{width:100%;margin-top:10px;padding:8px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:9px;font-weight:700;text-align:center;}
+
+/* ── BROWSER CHROME COLOR VARIANTS ── */
+/* 01 default: dark navy, blue accent top */
+.browser-chrome{border-top:2px solid #3b82f6;}
+/* 02 warm amber */
+.browser-chrome.warm{background:#1c1400;border-color:#3a2800;border-top:2px solid #f59e0b;}
+.browser-chrome.warm .browser-bar{background:#120d00;border-bottom-color:#3a2800;}
+.browser-chrome.warm .browser-url{background:#0a0800;color:#6b5020;}
+.browser-chrome.warm .preview-body::after{background:linear-gradient(transparent,#1c1400);}
+/* 03 purple */
+.browser-chrome.purple{background:#150d24;border-color:#2e1f4a;border-top:2px solid #a855f7;}
+.browser-chrome.purple .browser-bar{background:#0e0818;border-bottom-color:#2e1f4a;}
+.browser-chrome.purple .browser-url{background:#07040f;color:#5b3e85;}
+.browser-chrome.purple .preview-body::after{background:linear-gradient(transparent,#150d24);}
+/* 04 forest green */
+.browser-chrome.forest{background:#0a1a0c;border-color:#163820;border-top:2px solid #22c55e;}
+.browser-chrome.forest .browser-bar{background:#060f08;border-bottom-color:#163820;}
+.browser-chrome.forest .browser-url{background:#030a04;color:#2a5c32;}
+.browser-chrome.forest .preview-body::after{background:linear-gradient(transparent,#0a1a0c);}
+
+/* ── LIGHT MORNING BRIEFING THEME ── */
+.mb{background:#fffdf6;padding:14px;font-size:11px;color:#1a1208;min-height:300px;}
+.mb-h1{font-size:15px;font-weight:700;color:#1a1208;margin-bottom:2px;}
+.mb-sub{font-size:9px;color:#8b7355;margin-bottom:10px;}
+.mb-sessions{display:flex;gap:10px;flex-wrap:wrap;font-size:7.5px;color:#6b5020;background:#fff4e0;border:1px solid #e8d5b5;border-radius:5px;padding:4px 8px;margin-bottom:8px;}
+.mb-sec{font-size:7.5px;font-weight:700;color:#8b7355;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #e8d5b5;padding-bottom:3px;margin:8px 0 6px;}
+.mb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;}
+.mb-tile{background:#fffbf3;border:1px solid #e8d5b5;border-radius:6px;padding:6px 7px;}
+.mb-tile.up{border-left:3px solid #16a34a;} .mb-tile.dn{border-left:3px solid #dc2626;}
+.mb-code{font-size:8.5px;font-weight:700;color:#1a1208;} .mb-name{font-size:7px;color:#8b7355;}
+.mb-price{font-size:10px;font-weight:700;color:#1a1208;margin:2px 0;} .mb-chg{font-size:8.5px;font-weight:600;}
+.mb-news{background:#fffbf3;border:1px solid #e8d5b5;border-radius:7px;padding:8px;}
+.mb-news-meta{display:flex;gap:4px;align-items:center;margin-bottom:4px;}
+.mb-src{background:#dbeafe;color:#1d4ed8;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;}
+.mb-region{background:#ecfdf5;color:#16a34a;font-size:7px;padding:1px 5px;border-radius:3px;font-weight:600;border:1px solid #bbf7d0;}
+.mb-bull{background:#ecfdf5;color:#16a34a;border:1px solid #bbf7d0;font-size:7px;padding:1px 5px;border-radius:3px;font-weight:600;}
+.mb-headline{font-size:9px;font-weight:700;color:#1a1208;line-height:1.4;margin-bottom:3px;}
+.mb-why{font-size:7.5px;color:#6b5020;line-height:1.5;}
+/* ── CLEAN WHITE SPACEX THEME ── */
+.sx2{background:#f5f8ff;padding:14px;font-size:11px;color:#0f172a;min-height:300px;}
+.sx2-h1{font-size:15px;font-weight:700;color:#0f172a;margin-bottom:2px;display:flex;align-items:center;gap:8px;}
+.sx2-badge{font-size:8px;font-weight:700;background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;border-radius:3px;padding:2px 6px;}
+.sx2-sub{font-size:9px;color:#64748b;margin-bottom:10px;}
+.sx2-tabs{display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:10px;overflow-x:auto;}
+.sx2-tab{font-size:9px;color:#94a3b8;padding:5px 9px;white-space:nowrap;cursor:default;}
+.sx2-tab.act{color:#2563eb;border-bottom:2px solid #2563eb;font-weight:600;margin-bottom:-2px;}
+.sx2-stats{display:flex;gap:7px;margin-bottom:10px;}
+.sx2-stat{background:#ffffff;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;text-align:center;flex:1;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.sx2-stat-v{font-size:14px;font-weight:700;color:#2563eb;}
+.sx2-stat-l{font-size:6.5px;color:#64748b;text-transform:uppercase;letter-spacing:.3px;}
+.sx2-chart{background:#ffffff;border:1px solid #e2e8f0;border-radius:7px;padding:10px;height:90px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.sx2-chart-lbl{font-size:7px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.sx2-bars{position:absolute;bottom:12px;left:10px;right:10px;display:flex;align-items:flex-end;gap:4px;height:55px;}
+.sx2-bar{flex:1;background:linear-gradient(180deg,rgba(59,130,246,.8),rgba(59,130,246,.15));border-radius:2px 2px 0 0;}
+.sx2-bar.last{background:linear-gradient(180deg,rgba(124,58,237,.8),rgba(124,58,237,.15));}
+/* ── DARK GREEN MARKET INTELLIGENCE THEME ── */
+.mi{background:linear-gradient(160deg,#011c0a 0%,#022514 100%);padding:14px;font-size:11px;color:#c8e0c0;min-height:300px;}
+.mi-h1{font-size:15px;font-weight:700;color:#7ec87e;margin-bottom:2px;}
+.mi-sub{font-size:9px;color:#4d7a56;}
+.mi-live{font-size:8px;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25);padding:3px 8px;border-radius:4px;font-weight:700;}
+.mi-sbar{display:flex;gap:12px;background:rgba(0,40,15,.8);border:1px solid rgba(100,180,100,0.12);border-radius:8px;padding:8px 12px;margin:10px 0;flex-wrap:wrap;}
+.mi-sv{font-size:16px;font-weight:700;} .mi-sl{font-size:7.5px;color:#4d7a56;text-transform:uppercase;}
+.mi-sec{font-size:7.5px;font-weight:700;color:#4d7a56;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(100,180,100,0.12);padding-bottom:3px;margin:8px 0 6px;}
+.mi-topic{background:rgba(0,50,20,.8);color:#7ec87e;font-size:8px;padding:2px 7px;border-radius:4px;border:1px solid rgba(100,180,100,0.2);}
+.mi-row{background:rgba(0,40,15,.6);border:1px solid rgba(100,180,100,0.1);border-radius:6px;padding:6px 8px;margin-bottom:4px;}
+.mi-row-t{font-size:8.5px;font-weight:600;color:#c8e0c0;} .mi-row-s{font-size:7.5px;color:#4d7a56;margin-top:2px;}
+
+/* ── OTHER PROJECTS GRID ── */
+#projects{padding-top:0;padding-bottom:88px;}
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:1000px){.proj-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.proj-grid{grid-template-columns:1fr;}}
+.p-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:22px;display:flex;flex-direction:column;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.p-card:hover{border-color:rgba(37,99,235,.3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.09);}
+.p-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.p-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;}
+.p-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:5px;}
+.p-desc{font-size:12.5px;color:var(--muted);line-height:1.65;flex:1;margin-bottom:14px;}
+.p-tags{display:flex;flex-wrap:wrap;gap:5px;}
+
+/* ── ABOUT ── */
+#about{background:var(--bg);}
+.about-grid{display:grid;grid-template-columns:3fr 2fr;gap:48px;align-items:start;}
+@media(max-width:860px){.about-grid{grid-template-columns:1fr;}}
+.about-p{color:var(--muted);font-size:14.5px;line-height:1.8;margin-bottom:14px;}
+.about-p strong{color:var(--text);}
+.about-photo-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.about-photo{width:240px;height:240px;object-fit:cover;object-position:top center;border-radius:50%;box-shadow:0 12px 36px rgba(0,0,0,.12);border:3px solid var(--border);}
+.about-photo-name{font-size:13px;font-weight:600;color:var(--white);text-align:center;}
+.about-photo-sub{font-size:12px;color:var(--muted);text-align:center;margin-top:-10px;}
+
+/* ── EXPERIENCE ── */
+#experience{background:var(--surface);}
+.timeline{position:relative;padding-left:30px;}
+.timeline::before{content:'';position:absolute;left:6px;top:8px;bottom:0;width:2px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:32px;}
+.tl-item:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-30px;top:6px;width:13px;height:13px;border-radius:50%;border:2px solid var(--accent);background:var(--surface);}
+.tl-dot.current{background:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.15);}
+.tl-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:11px;padding:18px 22px;transition:border-color .2s;}
+.tl-card:hover{border-color:rgba(37,99,235,.3);}
+.tl-hdr{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:5px;}
+.tl-co{font-size:14px;font-weight:700;color:var(--white);}
+.tl-period{font-size:10.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:2px 9px;border-radius:20px;}
+.tl-role{font-size:12.5px;color:var(--accent);font-weight:500;margin-bottom:8px;}
+.tl-pts{list-style:none;}
+.tl-pts li{font-size:12.5px;color:var(--muted);line-height:1.6;padding:2px 0 2px 13px;position:relative;}
+.tl-pts li::before{content:'·';position:absolute;left:0;color:var(--accent);font-weight:700;}
+
+/* ── SKILLS ── */
+#skills{background:var(--bg);}
+.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:860px){.skills-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.skills-grid{grid-template-columns:1fr;}}
+.sk-group{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:18px;transition:border-color .2s;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.sk-group:hover{border-color:rgba(37,99,235,.25);}
+.sk-title{font-size:10.5px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+.sk-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.sk-chip{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+
+/* ── CONTACT ── */
+#contact{background:var(--surface);text-align:center;}
+.ct-card{max-width:540px;margin:0 auto;background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:44px 36px;}
+.ct-card p{color:var(--muted);font-size:14.5px;margin-bottom:28px;line-height:1.75;}
+.ct-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+.ct-link{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:13px;font-weight:500;padding:10px 18px;border-radius:7px;transition:border-color .2s,color .2s,transform .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.ct-link:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);}
+
+/* ── LEADERSHIP & COMMUNITY ── */
+.lc-sub-label{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;margin-top:44px;}
+.lc-sub-label:first-child{margin-top:0;}
+.lc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:1000px){.lc-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.lc-grid{grid-template-columns:1fr;}}
+.lc-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent2);border-radius:13px;padding:22px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.lc-card:hover{border-color:rgba(37,99,235,.3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.09);}
+.lc-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.lc-org{font-size:13.5px;font-weight:700;color:var(--white);}
+.lc-period{font-size:11px;color:var(--muted);white-space:nowrap;margin-top:2px;}
+.lc-role{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;}
+.lc-pts{list-style:none;padding:0;margin:4px 0 0;display:flex;flex-direction:column;gap:5px;}
+.lc-pts li{font-size:12.5px;color:var(--muted);padding-left:13px;position:relative;line-height:1.5;}
+.lc-pts li::before{content:'·';position:absolute;left:0;color:var(--accent);font-weight:700;}
+.vol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:1000px){.vol-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.vol-grid{grid-template-columns:1fr;}}
+.vol-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:10px;padding:16px 18px;transition:border-color .2s,transform .2s;}
+.vol-card:hover{border-color:rgba(37,99,235,.3);transform:translateY(-2px);}
+.vol-org{font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px;}
+.vol-period{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.vol-desc{font-size:12.5px;color:var(--muted);line-height:1.5;}
+.deck-carousel{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:560px;margin:0 auto;}
+.deck-slides{display:flex;transition:transform .35s ease;}
+.deck-slide{min-width:100%;display:flex;flex-direction:column;}
+.deck-thumb{width:100%;height:260px;object-fit:contain;object-position:center;background:#f4f4f4;border-bottom:1px solid var(--border);}
+.deck-info{padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
+.deck-counter{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
+.deck-title{font-size:15px;font-weight:700;color:var(--white);line-height:1.3;}
+.deck-ctx{font-size:12px;color:var(--muted);line-height:1.5;}
+.deck-actions{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.deck-dl{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--accent);text-decoration:none;border:1px solid rgba(37,99,235,.25);padding:6px 13px;border-radius:6px;transition:background .2s;}
+.deck-dl:hover{background:rgba(37,99,235,.07);}
+.deck-view{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:6px 13px;border-radius:6px;transition:background .2s,color .2s;}
+.deck-view:hover{color:var(--text);background:var(--surface2);}
+.deck-nav{display:flex;gap:8px;align-items:center;padding:12px 20px 16px;}
+.deck-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s;}
+.deck-btn:hover{border-color:var(--accent);background:rgba(37,99,235,.07);}
+.deck-dots{display:flex;gap:5px;flex:1;}
+.deck-dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s;}
+.deck-dot.active{background:var(--accent);}
+@media(max-width:700px){.deck-thumb{height:160px;}}
+
+/* ── TELEGRAM MOCKUP ── */
+.tg-wrap{margin-top:16px;display:flex;justify-content:center;}
+.tg-phone{width:195px;background:#fff;border-radius:28px;padding:8px;box-shadow:0 16px 40px rgba(0,0,0,.15),inset 0 0 0 1px #e0e0e0;}
+.tg-inner{border-radius:20px;overflow:hidden;}
+.tg-notch{height:14px;background:#5288c1;display:flex;align-items:center;justify-content:center;}
+.tg-notch::after{content:'';width:30px;height:4px;background:rgba(255,255,255,.25);border-radius:2px;}
+.tg-header{background:#5288c1;padding:8px 10px;display:flex;align-items:center;gap:7px;}
+.tg-avatar{width:24px;height:24px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;flex-shrink:0;}
+.tg-hinfo{flex:1;}
+.tg-hname{font-size:9px;font-weight:700;color:#fff;}
+.tg-hsub{font-size:7px;color:rgba(255,255,255,.65);}
+.tg-chat{background:#efeff4;padding:9px 9px 12px;}
+.tg-msg{background:#fff;border-radius:10px 10px 10px 2px;padding:9px 11px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.tg-mtitle{font-size:8.5px;font-weight:800;color:#2b5f8f;margin-bottom:6px;border-bottom:1px solid #f0f0f0;padding-bottom:5px;}
+.tg-mrow{display:flex;justify-content:space-between;font-size:7.5px;margin-bottom:3px;}
+.tg-ml{color:#999;}
+.tg-mv{font-weight:600;color:#1a1a1a;}
+.tg-mv.buy{color:#27ae60;}
+.tg-mv.sell{color:#e74c3c;}
+.tg-msep{height:1px;background:#f0f0f0;margin:6px 0;}
+.tg-msig{font-size:7px;color:#555;line-height:1.7;}
+.tg-mfooter{font-size:7px;font-weight:700;color:#27ae60;margin-top:5px;}
+.tg-mtime{font-size:6.5px;color:#bbb;text-align:right;margin-top:4px;}
+
+/* ── PHONE MOCKUP ── */
+.phone-pair{display:flex;gap:20px;justify-content:center;align-items:flex-start;}
+.phone{width:170px;background:#111;border-radius:32px;padding:9px;box-shadow:0 20px 48px rgba(0,0,0,.2),inset 0 0 0 1px #2a2a2a;flex-shrink:0;}
+.phone-inner{border-radius:24px;overflow:hidden;background:#F7EBCD;}
+.phone-notch{height:20px;background:#111;display:flex;align-items:center;justify-content:center;}
+.phone-notch::after{content:'';width:40px;height:6px;background:#222;border-radius:3px;}
+.ph-appbar{background:#DD6937;padding:8px 10px;display:flex;align-items:center;gap:6px;}
+.ph-appbar-title{font-size:9px;font-weight:700;color:#fff;flex:1;}
+.ph-appbar-icon{width:12px;height:12px;display:flex;flex-direction:column;gap:2px;justify-content:center;}
+.ph-appbar-icon span{display:block;height:1.5px;background:#fff;border-radius:1px;}
+.ph-body{background:#F7EBCD;padding:8px;}
+.ph-date{font-size:7px;color:#8B5E3C;font-weight:600;margin-bottom:6px;text-align:center;}
+.ph-food-card{background:#F9E0AE;border-radius:7px;padding:6px 8px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.ph-food-img{width:26px;height:26px;background:#DD6937;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ph-food-info{flex:1;}
+.ph-food-name{font-size:7.5px;font-weight:700;color:#3D2000;}
+.ph-food-kcal{font-size:7px;color:#8B5E3C;}
+.ph-food-qty{font-size:7px;background:#DD6937;color:#fff;padding:1px 5px;border-radius:3px;font-weight:600;}
+.ph-total{background:#DD6937;border-radius:7px;padding:6px 8px;margin-top:4px;display:flex;justify-content:space-between;align-items:center;}
+.ph-total-label{font-size:7px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.3px;}
+.ph-total-val{font-size:10px;font-weight:800;color:#fff;}
+.ph-goal{font-size:6.5px;color:rgba(255,255,255,.7);}
+.ph-bar-wrap{background:#F9E0AE;border-radius:7px;padding:7px 8px;margin-top:4px;}
+.ph-bar-label{font-size:6.5px;color:#8B5E3C;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.ph-bar-track{background:#F7EBCD;border-radius:3px;height:6px;overflow:hidden;}
+.ph-bar-fill{height:100%;background:#DD6937;border-radius:3px;}
+.ph-search{background:#F9E0AE;border-radius:5px;padding:5px 8px;font-size:7px;color:#8B5E3C;margin-bottom:6px;display:flex;align-items:center;gap:4px;}
+.ph-bmi-input{background:#F9E0AE;border-radius:5px;padding:5px 8px;margin-bottom:4px;}
+.ph-bmi-label{font-size:6.5px;color:#8B5E3C;text-transform:uppercase;letter-spacing:.3px;}
+.ph-bmi-val{font-size:8px;font-weight:600;color:#3D2000;}
+.ph-bmi-result{background:#DD6937;border-radius:7px;padding:8px;text-align:center;margin-top:6px;}
+.ph-bmi-num{font-size:20px;font-weight:800;color:#fff;line-height:1;}
+.ph-bmi-cat{font-size:7px;color:rgba(255,255,255,.85);margin-top:2px;}
+
+.slide-img{width:100%;height:300px;object-fit:contain;display:block;background:#f4f4f4;border-radius:8px 8px 0 0;}
+.ppt-nav{display:flex;align-items:center;justify-content:center;gap:14px;padding:7px 0;background:var(--surface);border-top:1px solid var(--border);}
+.ppt-btn{background:none;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;}
+.ppt-btn:hover{color:var(--white);border-color:var(--accent);}
+.ppt-counter{font-size:11px;color:var(--muted);min-width:55px;text-align:center;}
+@media(max-width:700px){.slide-img{height:200px;}}
+
+/* ── FOOTER ── */
+footer{padding:22px 80px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+footer p{font-size:11.5px;color:var(--muted);}
+@media(max-width:680px){footer{padding:22px 24px;flex-direction:column;text-align:center;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a class="nav-logo" href="#hero"><span class="nav-dot"></span>Jade Tan</a>
+  <div class="nav-links">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#community">Leadership</a>
+    <a href="#skills">Skills</a>
+    <a href="https://www.linkedin.com/in/jadetanhy/" target="_blank" rel="noopener" class="nav-cta">LinkedIn</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-layout">
+    <div class="hero-left">
+      <div class="hero-pill">Open to Opportunities</div>
+      <h1 class="hero-name">Jade <span>Tan</span></h1>
+      <p class="hero-contact">donkiae@gmail.com &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/jadetanhy/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--muted);">linkedin.com/in/jadetanhy</a> &nbsp;·&nbsp; Singapore</p>
+      <p class="hero-role">Finance · Technology · Asset Management</p>
+      <p class="hero-desc">I build AI-powered tools at the intersection of finance and software — from automated market intelligence pipelines to multi-agent trading research systems. Passionate about portfolio management, asset management, and using technology to make better investment decisions.</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn-pri">See My Work ↓</a>
+      </div>
+    </div>
+    <div class="hero-card-aside">
+      <div class="hc-item">
+        <div class="hc-label">Currently</div>
+        <div class="hc-val">Intern</div>
+        <div class="hc-sub">Raintree Asset Management</div>
+      </div>
+      <div class="hc-item">
+        <div class="hc-label">Studying</div>
+        <div class="hc-val">BSc Economics &amp; Finance</div>
+        <div class="hc-sub">University of London · Year 1</div>
+        <div class="hc-val" style="margin-top:7px;">Specialisation in Coding</div>
+        <div class="hc-sub">Nanyang Polytechnic</div>
+      </div>
+      <div class="hc-item">
+        <div class="hc-label">Based in</div>
+        <div class="hc-val">Singapore</div>
+      </div>
+      <div class="hc-item">
+        <div class="hc-label">Status</div>
+        <div style="margin-top:4px;"><span class="hc-open">Open to Opportunities</span></div>
+        <div class="hc-sub" style="margin-top:6px;">Internships · Finance & AI Projects</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURED WORK -->
+<section id="work">
+  <div class="fade-in">
+    <p class="s-label">Featured Work</p>
+    <h2 class="s-title">What I've Actually Built</h2>
+    <p class="s-sub">Real outputs from real projects — each preview shows what I actually built.</p>
+  </div>
+
+  <!-- 1: Market Intelligence Platform -->
+  <div class="featured-project fade-in">
+    <div class="fp-copy">
+      <div class="fp-meta">
+        <span class="fp-num">01</span>
+        <span class="fp-status live">Live · In Production</span>
+      </div>
+      <h3 class="fp-title">Market Intelligence Platform</h3>
+      <p class="fp-desc">The biggest project — an end-to-end AI-powered market intelligence pipeline built entirely from scratch. Microsoft Graph API ingests broker research emails from Outlook, Azure Blob stores raw data, GPT-4.1-mini classifies by asset class and extracts investment themes, Azure SQL stores everything, and a Flask dashboard with full-text search and date filtering serves the investment team. Azure Functions trigger the pipeline every 15 minutes automatically. Includes an AI chatbot powered by Claude that lets users ask questions directly about the ingested research emails and market data.</p>
+      <div class="fp-tags">
+        <span class="tag py">Python</span>
+        <span class="tag ai">GPT-4.1-mini</span>
+        <span class="tag az">Azure SQL</span>
+        <span class="tag az">Azure Blob</span>
+        <span class="tag az">Azure Functions</span>
+        <span class="tag data">Graph API</span>
+        <span class="tag web">Flask</span>
+      </div>
+      <div class="fp-actions">
+        <span class="detail-btn" style="cursor:default;">Internal Tool · Built From Scratch</span>
+      </div>
+    </div>
+    <div class="preview-wrap">
+      <div class="browser-chrome forest">
+        <div class="browser-bar">
+          <div class="browser-dots"><div class="browser-dot bd-r"></div><div class="browser-dot bd-y"></div><div class="browser-dot bd-g"></div></div>
+          <div class="browser-url">Market Intelligence Dashboard · Raintree Asset Management</div>
+        </div>
+        <div class="preview-body">
+          <div class="mi">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+              <div><div class="mi-h1">Market Intelligence</div><div class="mi-sub">GPT-4.1-mini · Azure SQL · Live Pipeline</div></div>
+              <span class="mi-live">● LIVE</span>
+            </div>
+            <div class="mi-sbar">
+              <div><div class="mi-sv" style="color:#7ec87e">847</div><div class="mi-sl">Emails</div></div>
+              <div><div class="mi-sv" style="color:#60b8d8">6</div><div class="mi-sl">Classes</div></div>
+              <div><div class="mi-sv" style="color:#FF6600">24</div><div class="mi-sl">Topics</div></div>
+              <div><div class="mi-sv" style="color:#a8d08d">15min</div><div class="mi-sl">Refresh</div></div>
+            </div>
+            <div class="mi-sec">Hot Topics This Week</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+              <span class="mi-topic">Fed Rate Path</span>
+              <span class="mi-topic">China PMI</span>
+              <span class="mi-topic">IG Credit Spreads</span>
+              <span class="mi-topic">USD Strength</span>
+              <span class="mi-topic">EM Flows</span>
+            </div>
+            <div class="mi-sec">Recent Research</div>
+            <div class="mi-row">
+              <div class="mi-row-t">Goldman Sachs — Asia Credit Weekly</div>
+              <div class="mi-row-s">IG spreads remain resilient; selective HY opportunities in BBB-rated Asia issuers...</div>
+            </div>
+            <div class="mi-row">
+              <div class="mi-row-t">Morgan Stanley — FX Outlook June</div>
+              <div class="mi-row-s">DXY consolidation likely near-term; JPY intervention risk elevated above 160...</div>
+            </div>
+            <div class="mi-sec">Ask AI</div>
+            <div style="background:linear-gradient(135deg,#002b17 0%,#004424 100%);border:1px solid rgba(168,208,141,0.18);border-radius:8px;padding:10px;">
+              <div style="font-size:7.5px;font-weight:700;color:#A8D08D;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
+                <span style="width:5px;height:5px;background:#FF6600;border-radius:50%;display:inline-block;"></span>
+                Market Intelligence Assistant
+              </div>
+              <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(168,208,141,0.2);border-radius:5px;padding:5px 8px;font-size:8px;color:#A8D08D;margin-bottom:6px;">What are the main themes this week?</div>
+              <div style="display:flex;gap:5px;">
+                <div style="background:#FF6600;color:#fff;font-size:8px;font-weight:700;padding:3px 9px;border-radius:4px;">Ask AI</div>
+                <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(168,208,141,0.2);color:#A8D08D;font-size:8px;padding:3px 8px;border-radius:4px;">Web Search</div>
+              </div>
+              <div style="margin-top:7px;padding-top:7px;border-top:1px solid rgba(168,208,141,0.12);font-size:7.5px;color:#DCE8D2;line-height:1.6;">
+                <div style="color:#A8D08D;font-weight:700;margin-bottom:3px;">This Week's Key Themes</div>
+                <div><span style="color:#FF6600;font-weight:700;">·</span> <strong style="color:#F8F5F0;">Fed Rate Path</strong> — most cited across 34 emails.</div>
+                <div><span style="color:#FF6600;font-weight:700;">·</span> <strong style="color:#F8F5F0;">Asia Credit</strong> — IG spreads resilient, flagged by GS/UBS/Citi.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2: Morning Market Briefing -->
+  <div class="featured-project rev fade-in">
+    <div class="fp-copy">
+      <div class="fp-meta">
+        <span class="fp-num">02</span>
+        <span class="fp-status built">Built</span>
+      </div>
+      <h3 class="fp-title">Daily Market Briefing</h3>
+      <p class="fp-desc">Automated morning report that pulls overnight market moves across HK, China, US, London — then runs them through an AI analysis layer. Outputs market tiles, top news cards with "WHY IT MOVED" explanations, Fed watch, economic calendar beats/misses, and a final multi-AI summary with key watch items. Scheduled to auto-run every morning.</p>
+      <div class="fp-tags">
+        <span class="tag py">Python</span>
+        <span class="tag ai">AI Summary</span>
+        <span class="tag data">Market Data</span>
+        <span class="tag data">Econ Calendar</span>
+        <span class="tag web">HTML Report</span>
+      </div>
+    </div>
+    <div class="preview-wrap">
+      <div class="browser-chrome warm">
+        <div class="browser-bar">
+          <div class="browser-dots"><div class="browser-dot bd-r"></div><div class="browser-dot bd-y"></div><div class="browser-dot bd-g"></div></div>
+          <div class="browser-url">Morning Market Briefing · Wed 10 Jun 2026 · Generated 14:35 SGT</div>
+        </div>
+        <div class="preview-body">
+          <div class="mb">
+            <div class="mb-h1">Morning Market Briefing</div>
+            <div class="mb-sub">Generated 14:35 · 10 Jun 2026 SGT · Not financial advice</div>
+            <div class="mb-sessions">
+              <span>HK <b style="color:#1a1208">Hong Kong</b> 09:30–16:00</span>
+              <span>CN <b style="color:#1a1208">Shanghai</b> 09:30–16:00</span>
+              <span>GB <b style="color:#1a1208">London</b> 15:00–00:00</span>
+              <span>US <b style="color:#1a1208">New York</b> 20:30–03:00</span>
+            </div>
+            <div class="mb-sec">Market Overview — 09 Jun 2026</div>
+            <div class="mb-grid">
+              <div class="mb-tile dn"><div class="mb-code">HK</div><div class="mb-name">Hang Seng</div><div class="mb-price">24,380.01</div><div class="mb-chg" style="color:#dc2626">-1.12%</div></div>
+              <div class="mb-tile up"><div class="mb-code">CN</div><div class="mb-name">SSE Composite</div><div class="mb-price">3,989.47</div><div class="mb-chg" style="color:#16a34a">+0.76%</div></div>
+              <div class="mb-tile up"><div class="mb-code">US</div><div class="mb-name">S&amp;P 500</div><div class="mb-price">5,431.60</div><div class="mb-chg" style="color:#16a34a">+0.44%</div></div>
+              <div class="mb-tile dn"><div class="mb-code">GB</div><div class="mb-name">FTSE 100</div><div class="mb-price">8,245.32</div><div class="mb-chg" style="color:#dc2626">-0.31%</div></div>
+              <div class="mb-tile up"><div class="mb-code">JP</div><div class="mb-name">Nikkei 225</div><div class="mb-price">38,812.50</div><div class="mb-chg" style="color:#16a34a">+1.20%</div></div>
+              <div class="mb-tile dn"><div class="mb-code">DE</div><div class="mb-name">DAX</div><div class="mb-price">18,240.10</div><div class="mb-chg" style="color:#dc2626">-0.55%</div></div>
+            </div>
+            <div class="mb-sec">Top Stories</div>
+            <div class="mb-news">
+              <div class="mb-news-meta">
+                <span class="mb-src">Bloomberg</span>
+                <span class="mb-region">US</span>
+                <span class="mb-bull">BULLISH</span>
+              </div>
+              <div class="mb-headline">Fed signals potential pause in rate hike cycle as inflation cools</div>
+              <div class="mb-why"><b style="color:#2563eb;">WHY:</b> Core PCE came in below expectations at 2.6% — opening door for September cut pricing.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3: SpaceX Deep Dive -->
+  <div class="featured-project fade-in">
+    <div class="fp-copy">
+      <div class="fp-meta">
+        <span class="fp-num">03</span>
+        <span class="fp-status research">Research</span>
+      </div>
+      <h3 class="fp-title">SpaceX IPO Deep Dive</h3>
+      <p class="fp-desc">Interactive investment research report on SpaceX's IPO prospects. Built as a fully standalone HTML page with Chart.js visualisations — revenue trajectory, launch cadence, Starlink subscriber growth, valuation scenario modelling (bear/base/bull), and a structured investment thesis.</p>
+      <div class="fp-tags">
+        <span class="tag web">HTML/CSS/JS</span>
+        <span class="tag web">Chart.js</span>
+        <span class="tag data">Valuation</span>
+        <span class="tag data">Equity Research</span>
+      </div>
+    </div>
+    <div class="preview-wrap">
+      <div class="browser-chrome purple">
+        <div class="browser-bar">
+          <div class="browser-dots"><div class="browser-dot bd-r"></div><div class="browser-dot bd-y"></div><div class="browser-dot bd-g"></div></div>
+          <div class="browser-url">SpaceX Deep Dive — Investment Intelligence Report</div>
+        </div>
+        <div class="preview-body">
+          <div class="sx2">
+            <div class="sx2-h1">
+              <span style="width:26px;height:26px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;">SX</span>
+              SpaceX Deep Dive
+              <span class="sx2-badge">INVESTMENT GRADE</span>
+            </div>
+            <div class="sx2-sub">Pre-IPO Analysis · Valuation Intelligence · June 2026</div>
+            <div class="sx2-tabs">
+              <span class="sx2-tab act">Overview</span>
+              <span class="sx2-tab">Financials</span>
+              <span class="sx2-tab">Starlink</span>
+              <span class="sx2-tab">Valuation</span>
+              <span class="sx2-tab">Thesis</span>
+            </div>
+            <div class="sx2-stats">
+              <div class="sx2-stat"><div class="sx2-stat-v">$350B</div><div class="sx2-stat-l">Valuation</div></div>
+              <div class="sx2-stat"><div class="sx2-stat-v" style="color:#16a34a">96%</div><div class="sx2-stat-l">Launch Success</div></div>
+              <div class="sx2-stat"><div class="sx2-stat-v" style="color:#7c3aed">7.2M</div><div class="sx2-stat-l">Starlink Subs</div></div>
+              <div class="sx2-stat"><div class="sx2-stat-v" style="color:#d97706">128</div><div class="sx2-stat-l">2025 Launches</div></div>
+            </div>
+            <div class="sx2-chart">
+              <div class="sx2-chart-lbl">Revenue Trajectory ($B)</div>
+              <div class="sx2-bars">
+                <div class="sx2-bar" style="height:20%"></div>
+                <div class="sx2-bar" style="height:32%"></div>
+                <div class="sx2-bar" style="height:45%"></div>
+                <div class="sx2-bar" style="height:55%"></div>
+                <div class="sx2-bar" style="height:68%"></div>
+                <div class="sx2-bar" style="height:82%"></div>
+                <div class="sx2-bar last" style="height:100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: AI Trade Council -->
+  <div class="featured-project rev fade-in">
+    <div class="fp-copy">
+      <div class="fp-meta">
+        <span class="fp-num">04</span>
+        <span class="fp-status built">Built</span>
+      </div>
+      <h3 class="fp-title">AI Trade Council</h3>
+      <p class="fp-desc">Multi-agent system where AI agents collaborate on live market analysis. Each asset gets a full signal confluence report — RSI, MACD, Bollinger Bands, EMA crossovers, candlestick patterns — then Claude and Perplexity cross-check the thesis. Outputs BUY / SELL / HOLD with entry price, target, stop-loss, risk/reward ratio, and a discipline check. Final signals are pushed directly to a Telegram bot.</p>
+      <div class="fp-tags">
+        <span class="tag py">Python</span>
+        <span class="tag ai">Claude AI</span>
+        <span class="tag ai">Perplexity</span>
+        <span class="tag ai">Multi-Agent</span>
+        <span class="tag data">Technical Analysis</span>
+        <span class="tag web">HTML Dashboard</span>
+        <span class="tag web">Telegram Bot</span>
+      </div>
+    </div>
+    <div class="preview-wrap">
+      <div class="browser-chrome">
+        <div class="browser-bar">
+          <div class="browser-dots"><div class="browser-dot bd-r"></div><div class="browser-dot bd-y"></div><div class="browser-dot bd-g"></div></div>
+          <div class="browser-url">AI Trade Council · Updated 09:50 SGT</div>
+        </div>
+        <div class="preview-body">
+          <div class="db">
+            <div class="db-h1">AI Trade Council</div>
+            <div class="db-sub">Last updated: 2026-06-16 09:50:40 &nbsp;|&nbsp; Perplexity + Claude &nbsp;|&nbsp; All times SGT</div>
+            <div class="db-sbar">
+              <div class="db-stat"><div class="db-stat-v orange">0</div><div class="db-stat-l">Act Now</div></div>
+              <div class="db-stat"><div class="db-stat-v green">0</div><div class="db-stat-l">Buy Signals</div></div>
+              <div class="db-stat"><div class="db-stat-v red">0</div><div class="db-stat-l">Sell Signals</div></div>
+              <div class="db-stat"><div class="db-stat-v">2</div><div class="db-stat-l">Hold / Watch</div></div>
+              <div class="db-stat"><div class="db-stat-v">2</div><div class="db-stat-l">Assets Scanned</div></div>
+            </div>
+            <div class="db-sec">Forex</div>
+            <div class="db-grid">
+              <div class="db-card hold">
+                <div class="db-sym">XAU/USD <span style="font-size:8px;color:#8b949e">H1 · D1: BEARISH</span></div>
+                <div class="db-prow"><span class="db-price">USD 4,338.50</span><span class="db-chg down">-0.17%</span></div>
+                <span class="db-badge HOLD">HOLD</span><span class="db-badge WAIT">WAIT</span>
+                <div class="db-levels">
+                  <div class="db-lvl"><div class="db-lvl-l">Entry</div><div class="db-lvl-v entry-c">4338.50</div></div>
+                  <div class="db-lvl"><div class="db-lvl-l">Target</div><div class="db-lvl-v tgt-c">—</div></div>
+                  <div class="db-lvl"><div class="db-lvl-l">Stop</div><div class="db-lvl-v stop-c">—</div></div>
+                </div>
+                <div class="db-risk"><span class="risk-high">HIGH RISK</span><span style="color:#8b949e;font-size:7px">R:R 0.0x &nbsp;·&nbsp; Confidence 28%</span></div>
+                <div class="db-sig">Stochastic oversold (K:18.2) → BUY bias. Only 1/3 signals. WAIT.</div>
+              </div>
+              <div class="db-card hold">
+                <div class="db-sym">USD/JPY <span style="font-size:8px;color:#8b949e">H1 · D1: BULLISH</span></div>
+                <div class="db-prow"><span class="db-price">JPY 160.14</span><span class="db-chg down">-0.09%</span></div>
+                <span class="db-badge HOLD">HOLD</span><span class="db-badge WAIT">WAIT</span>
+                <div class="db-levels">
+                  <div class="db-lvl"><div class="db-lvl-l">Entry</div><div class="db-lvl-v entry-c">160.14</div></div>
+                  <div class="db-lvl"><div class="db-lvl-l">Target</div><div class="db-lvl-v tgt-c">—</div></div>
+                  <div class="db-lvl"><div class="db-lvl-l">Stop</div><div class="db-lvl-v stop-c">—</div></div>
+                </div>
+                <div class="db-risk"><span class="risk-high">HIGH RISK</span><span style="color:#8b949e;font-size:7px">R:R 0.0x &nbsp;·&nbsp; Confidence 30%</span></div>
+                <div class="db-sig">Death Cross EMA20/EMA50 + lower highs/lows. 2/3 signals. WAIT for London.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tg-wrap">
+        <div class="tg-phone">
+          <div class="tg-inner">
+            <div class="tg-notch"></div>
+            <div class="tg-header">
+              <div class="tg-avatar">TC</div>
+              <div class="tg-hinfo">
+                <div class="tg-hname">AI Trade Council</div>
+                <div class="tg-hsub">bot · online</div>
+              </div>
+            </div>
+            <div class="tg-chat">
+              <div class="tg-msg">
+                <div class="tg-mtitle">SIGNAL ALERT · NVDA</div>
+                <div class="tg-mrow"><span class="tg-ml">Signal</span><span class="tg-mv buy">BUY</span></div>
+                <div class="tg-mrow"><span class="tg-ml">Entry</span><span class="tg-mv">$118.40</span></div>
+                <div class="tg-mrow"><span class="tg-ml">Target</span><span class="tg-mv">$128.50 (+8.5%)</span></div>
+                <div class="tg-mrow"><span class="tg-ml">Stop-Loss</span><span class="tg-mv">$113.20 (-4.4%)</span></div>
+                <div class="tg-mrow"><span class="tg-ml">R:R Ratio</span><span class="tg-mv">1.9 : 1</span></div>
+                <div class="tg-msep"></div>
+                <div class="tg-msig">
+                  RSI(14): 38.4 — oversold<br>
+                  MACD: Bullish crossover<br>
+                  BB: Price at lower band<br>
+                  EMA20/50: Cross forming<br>
+                  Pattern: Hammer candle
+                </div>
+                <div class="tg-msep"></div>
+                <div class="tg-mfooter">Claude + Perplexity: Confirmed</div>
+                <div class="tg-mrow" style="margin-top:3px;"><span class="tg-ml">Discipline Check</span><span class="tg-mv buy">PASS</span></div>
+                <div class="tg-mtime">09:50 SGT · 16 Jun 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 5: Calorie Tracker -->
+  <div class="featured-project fade-in" style="margin-top:72px;">
+  <div class="fp-copy">
+    <div class="fp-meta">
+      <span class="fp-num">05</span>
+      <span class="fp-status built">Built</span>
+    </div>
+    <h3 class="fp-title">Calorie Tracker</h3>
+    <p class="fp-desc">Full cross-platform Flutter app (Android, iOS, Web, Desktop) for daily meal management. Handles Firebase sign-up/login, food search via Spoonacular API with photo thumbnails and quantity controls, a calorie goal tracker with a live progress bar, meal history by date, BMI calculator with categorised results, and a ChatGPT-powered nutrition tips chat. All data synced to Firestore in real time.</p>
+    <div class="fp-tags">
+      <span class="tag mob">Flutter</span>
+      <span class="tag mob">Dart</span>
+      <span class="tag az">Firebase Auth</span>
+      <span class="tag az">Firestore</span>
+      <span class="tag data">Spoonacular API</span>
+      <span class="tag ai">ChatGPT</span>
+      <span class="tag mob">Cross-Platform</span>
+    </div>
+  </div>
+  <div class="preview-wrap">
+    <div class="phone-pair">
+      <!-- Phone 1: Food Tracker Home -->
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="ph-appbar">
+            <div class="ph-appbar-icon"><span></span><span></span><span></span></div>
+            <div class="ph-appbar-title">Food Tracker</div>
+          </div>
+          <div class="ph-body">
+            <div class="ph-date">Mon, 16 Jun 2026</div>
+            <div class="ph-food-card">
+              <div class="ph-food-img" style="font-size:7px;font-weight:800;color:#fff;">CHK</div>
+              <div class="ph-food-info"><div class="ph-food-name">Grilled Chicken Breast</div><div class="ph-food-kcal">165 kcal &nbsp;·&nbsp; 1 serving</div></div>
+              <div class="ph-food-qty">×1</div>
+            </div>
+            <div class="ph-food-card">
+              <div class="ph-food-img" style="font-size:7px;font-weight:800;color:#fff;">RCE</div>
+              <div class="ph-food-info"><div class="ph-food-name">Brown Rice (1 cup)</div><div class="ph-food-kcal">216 kcal &nbsp;·&nbsp; 1 serving</div></div>
+              <div class="ph-food-qty">×1</div>
+            </div>
+            <div class="ph-food-card">
+              <div class="ph-food-img" style="font-size:7px;font-weight:800;color:#fff;">SLD</div>
+              <div class="ph-food-info"><div class="ph-food-name">Mixed Green Salad</div><div class="ph-food-kcal">58 kcal &nbsp;·&nbsp; 1 serving</div></div>
+              <div class="ph-food-qty">×1</div>
+            </div>
+            <div class="ph-food-card">
+              <div class="ph-food-img" style="font-size:7px;font-weight:800;color:#fff;">BNA</div>
+              <div class="ph-food-info"><div class="ph-food-name">Banana</div><div class="ph-food-kcal">89 kcal &nbsp;·&nbsp; 1 serving</div></div>
+              <div class="ph-food-qty">×1</div>
+            </div>
+            <div class="ph-total">
+              <div><div class="ph-total-label">Today's Total</div><div class="ph-goal">Goal: 1,800 kcal</div></div>
+              <div style="text-align:right;"><div class="ph-total-val">528 kcal</div></div>
+            </div>
+            <div class="ph-bar-wrap">
+              <div class="ph-bar-label">Progress to goal</div>
+              <div class="ph-bar-track"><div class="ph-bar-fill" style="width:29%"></div></div>
+              <div style="font-size:6px;color:#8B5E3C;margin-top:2px;text-align:right;">29% · 1,272 kcal remaining</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Phone 2: Food Search + BMI -->
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="ph-appbar">
+            <span style="font-size:9px;color:#fff;margin-right:4px;">←</span>
+            <div class="ph-appbar-title">Food Nutrition</div>
+          </div>
+          <div class="ph-body">
+            <div class="ph-search">Search for a food...</div>
+            <div class="ph-food-card">
+              <div class="ph-food-img" style="background:#C24914;font-size:7px;font-weight:800;color:#fff;">CHK</div>
+              <div class="ph-food-info"><div class="ph-food-name">Chicken Breast</div><div class="ph-food-kcal">Calories: 165 kcal</div></div>
+              <div style="display:flex;align-items:center;gap:2px;"><span style="font-size:9px;background:#eee;padding:1px 4px;border-radius:2px;">−</span><span style="font-size:7px;font-weight:700;padding:1px 3px;">1</span><span style="font-size:9px;background:#eee;padding:1px 4px;border-radius:2px;">+</span><span style="font-size:9px;margin-left:2px;color:#DD6937;font-weight:700;">✓</span></div>
+            </div>
+            <div class="ph-food-card">
+              <div class="ph-food-img" style="background:#C24914;font-size:7px;font-weight:800;color:#fff;">SLD</div>
+              <div class="ph-food-info"><div class="ph-food-name">Caesar Salad</div><div class="ph-food-kcal">Calories: 180 kcal</div></div>
+              <div style="display:flex;align-items:center;gap:2px;"><span style="font-size:9px;background:#eee;padding:1px 4px;border-radius:2px;">−</span><span style="font-size:7px;font-weight:700;padding:1px 3px;">1</span><span style="font-size:9px;background:#eee;padding:1px 4px;border-radius:2px;">+</span><span style="font-size:9px;margin-left:2px;color:#DD6937;font-weight:700;">✓</span></div>
+            </div>
+            <div style="height:1px;background:#E8D4A8;margin:6px 0;"></div>
+            <div style="font-size:7px;font-weight:700;color:#DD6937;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">BMI Calculator</div>
+            <div class="ph-bmi-input"><div class="ph-bmi-label">Weight</div><div class="ph-bmi-val">68.0 kg</div></div>
+            <div class="ph-bmi-input"><div class="ph-bmi-label">Height</div><div class="ph-bmi-val">172.0 cm</div></div>
+            <div class="ph-bmi-result">
+              <div class="ph-bmi-num">23.0</div>
+              <div class="ph-bmi-cat">Normal Weight</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- OTHER PROJECTS -->
+<section id="projects" style="background:var(--bg);">
+  <div class="fade-in">
+    <p class="s-label">More Projects</p>
+    <h2 class="s-title">Everything Else</h2>
+    <p class="s-sub">Earlier work across full-stack web, mobile, and embedded systems.</p>
+  </div>
+  <div class="proj-grid fade-in">
+    <div class="p-card">
+      <div class="p-top">
+        <div class="p-icon" style="background:rgba(14,165,233,.12);color:#0369a1;font-size:10px;font-weight:800;">PDF</div>
+        <span class="fp-status built" style="font-size:10px;padding:2px 8px;">Built</span>
+      </div>
+      <div class="p-name">PDF → Excel Converter</div>
+      <div class="p-desc">Drag-and-drop Flask tool that extracts tables from bank statements and trade reports into structured Excel. Clean UI, multi-file support, streamed download.</div>
+      <div class="p-tags">
+        <span class="tag py">Python</span><span class="tag web">Flask</span><span class="tag web">JS</span><span class="tag data">PDF Parsing</span>
+      </div>
+    </div>
+    <div class="p-card">
+      <div class="p-top">
+        <div class="p-icon" style="background:rgba(239,68,68,.12);color:#b91c1c;font-size:10px;font-weight:800;">BOT</div>
+        <span class="fp-status built" style="font-size:10px;padding:2px 8px;">Built</span>
+      </div>
+      <div class="p-name">Trading Bot</div>
+      <div class="p-desc">Algorithmic signal generator with a Claude-powered analyst, live market feed, and technical indicator engine. Generates structured trade commentary on setups.</div>
+      <div class="p-tags">
+        <span class="tag py">Python</span><span class="tag ai">Claude AI</span><span class="tag data">Market Feed</span><span class="tag data">Indicators</span>
+      </div>
+    </div>
+    <div class="p-card">
+      <div class="p-top">
+        <div class="p-icon" style="background:rgba(34,197,94,.12);color:#15803d;font-size:10px;font-weight:800;">HMS</div>
+        <span class="fp-status built" style="font-size:10px;padding:2px 8px;">Built</span>
+      </div>
+      <div class="p-name">Hospital Management System</div>
+      <div class="p-desc">Full-stack web app — appointment booking, patient records, admin filtering. Vanilla JavaScript frontend with a MySQL relational backend.</div>
+      <div class="p-tags">
+        <span class="tag web">JavaScript</span><span class="tag web">HTML/CSS</span><span class="tag data">MySQL</span>
+      </div>
+    </div>
+    <div class="p-card">
+      <div class="p-top">
+        <div class="p-icon" style="background:rgba(245,158,11,.12);color:#b45309;font-size:10px;font-weight:800;">IOT</div>
+        <span class="fp-status built" style="font-size:10px;padding:2px 8px;">Built</span>
+      </div>
+      <div class="p-name">IoT Master-Slave System</div>
+      <div class="p-desc">Arduino + Python sensor communication system using master-slave protocol for coordinated data collection. Achieved Distinction.</div>
+      <div class="p-tags">
+        <span class="tag py">Python</span><span class="tag mob">Arduino</span><span class="tag data">IoT</span>
+      </div>
+    </div>
+    <div class="p-card">
+      <div class="p-top">
+        <div class="p-icon" style="background:rgba(79,142,247,.12);color:#1d4ed8;font-size:10px;font-weight:800;">RPA</div>
+        <span class="fp-status built" style="font-size:10px;padding:2px 8px;">Built</span>
+      </div>
+      <div class="p-name">RPA Automation (UiPath)</div>
+      <div class="p-desc">Workflow automation built during MHA internship — compares Excel datasets and highlights discrepancies, replacing hours of manual reconciliation.</div>
+      <div class="p-tags">
+        <span class="tag data">UiPath</span><span class="tag data">Excel</span><span class="tag data">RPA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="fade-in">
+    <p class="s-label">About Me</p>
+    <h2 class="s-title">Jade Tan Hong Yu</h2>
+    <p class="s-sub">First-year Economics &amp; Finance student</p>
+  </div>
+  <div class="about-grid fade-in">
+    <div>
+      <p class="about-p">I'm Jade. I started out studying coding at NYP, but somewhere along the way I realised I was just as interested in markets and investing as I was in building things. Instead of choosing one, I decided to pursue both. Today, I'm studying Economics &amp; Finance at the University of London while continuing to build technology solutions for finance teams.</p>
+      <p class="about-p">Most recently at Raintree Asset Management, I built an AI-powered market intelligence platform that pulls research from multiple banks, processes it through Azure and AI workflows, and turns it into a daily digest for the CIO team. Seeing something I built become part of an actual investment process was what made me realise how much I enjoy working at the intersection of finance and technology.</p>
+      <p class="about-p">Outside of work, I'm a Senior Analyst with the Student Investment Club, where I conduct equity research and develop investment theses. I'm also Vice President and Co-Head of Training for the Business Strategy Club, where I teach consulting frameworks, case-solving techniques and structured problem-solving. I recently competed in Think Cell's case competition, working on strategic recommendations for Netflix.</p>
+      <p class="about-p">Beyond finance and technology, I'm passionate about giving back to the community. Over the years, I've volunteered with organisations such as Willing Hearts, Causes for Animals, St. Luke's ElderCare and tutoring programmes for underprivileged students. These experiences have taught me empathy, patience and the importance of creating meaningful impact beyond the workplace.</p>
+      <p class="about-p">I'm naturally curious and enjoy figuring out how things work — whether that's analysing a company, building a data pipeline, or solving an operational problem. I like turning complexity into something useful.</p>
+      <p class="about-p">Long term, I'm looking for opportunities where finance, strategy and technology come together. The most exciting problems, in my view, sit at the intersection of all three.</p>
+    </div>
+    <div class="about-photo-wrap">
+      <img src="photo.png" alt="Jade Tan" class="about-photo">
+      <div class="about-photo-name">Jade Tan</div>
+      <div class="about-photo-sub">Singapore</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="fade-in">
+    <p class="s-label">Experience</p>
+    <h2 class="s-title">Where I've Worked</h2>
+    <p class="s-sub">Three internships across asset management, financial services, and government tech.</p>
+  </div>
+  <div class="timeline fade-in">
+    <div class="tl-item">
+      <div class="tl-dot current"></div>
+      <div class="tl-card">
+        <div class="tl-hdr"><div class="tl-co">Raintree Asset Management</div><div class="tl-period">May 2026 – Present</div></div>
+        <div class="tl-role">Intern</div>
+        <ul class="tl-pts">
+          <li>Architected end-to-end market intelligence platform: Azure Blob + Azure SQL + Microsoft Graph API + Flask dashboard.</li>
+          <li>Built GPT-4.1-mini classification and summarisation pipeline processing broker research emails daily.</li>
+          <li>Developed Azure Functions timer trigger (every 15 min) running the full pipeline autonomously.</li>
+          <li>Delivered interactive CIO dashboard with date filtering, full-text search, and analytics.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-hdr"><div class="tl-co">Prudential Singapore</div><div class="tl-period">2025 · 6 months</div></div>
+        <div class="tl-role">Financial Services Intern</div>
+        <ul class="tl-pts">
+          <li>Portfolio reviews, insurance structuring, and investment advisory support.</li>
+          <li>Prepared financial needs analysis documents and client presentation materials.</li>
+          <li>Exposure to wealth accumulation, retirement planning, and risk management.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-hdr"><div class="tl-co">NCS / Ministry of Home Affairs</div><div class="tl-period">2025 · 6 months</div></div>
+        <div class="tl-role">Business Analyst Intern</div>
+        <ul class="tl-pts">
+          <li>Built UiPath RPA workflows replacing manual Excel reconciliation processes.</li>
+          <li>Data analysis and case management tracking for operational teams.</li>
+          <li>Stakeholder collaboration to improve internal data management.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LEADERSHIP & COMMUNITY -->
+<section id="community">
+  <div class="fade-in">
+    <p class="s-label">Leadership & Community</p>
+    <h2 class="s-title">Beyond the Code</h2>
+    <p class="s-sub">Clubs, causes, and competitions that round out the work.</p>
+  </div>
+
+  <div class="fade-in">
+    <div class="lc-sub-label">Leadership & CCAs</div>
+    <div class="lc-grid">
+      <div class="lc-card">
+        <div class="lc-card-hdr">
+          <div class="lc-org">Student Investment Club</div>
+          <div class="lc-period">2025 – Present</div>
+        </div>
+        <div class="lc-role">Senior Analyst · Student Managed Funds</div>
+        <ul class="lc-pts">
+          <li>Conduct equity research on listed companies, analysing financial statements and industry positioning.</li>
+          <li>Build pitch decks, equity research reports, and company teasers with structured investment theses.</li>
+          <li>Participated in the Internal School CFA Research Challenge.</li>
+        </ul>
+      </div>
+      <div class="lc-card">
+        <div class="lc-card-hdr">
+          <div class="lc-org">Business Strategy Club</div>
+          <div class="lc-period">2025 – Present</div>
+        </div>
+        <div class="lc-role">Vice President & Co-Head of Training</div>
+        <ul class="lc-pts">
+          <li>Lead planning and execution of the club's training programme — strategy, workshops, and member development.</li>
+          <li>Design and deliver consulting-style case interview materials and strategic frameworks.</li>
+          <li>Mentor members through case preparation and structured problem-solving sessions.</li>
+          <li>Represented the club at the Think Cell Case Competition, analysing Netflix strategy.</li>
+        </ul>
+      </div>
+      <div class="lc-card">
+        <div class="lc-card-hdr">
+          <div class="lc-org">SIM Student Ambassador</div>
+          <div class="lc-period">2025 – Present</div>
+        </div>
+        <div class="lc-role">Member</div>
+        <ul class="lc-pts">
+          <li>Represent the university at outreach and engagement events.</li>
+          <li>Coordinate student engagement activities and club affairs.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lc-sub-label">Decks & Research</div>
+    <div class="deck-carousel" id="deckCarousel">
+      <div class="deck-slides" id="deckSlides">
+        <div class="deck-slide">
+          <img id="slide0" src="SMF%20Pitch%20Deck/Slide1.JPG" class="slide-img">
+          <div class="ppt-nav">
+            <button class="ppt-btn" onclick="slideNav(0,-1)">&#8249;</button>
+            <span class="ppt-counter" id="slide0-counter">1 / 8</span>
+            <button class="ppt-btn" onclick="slideNav(0,1)">&#8250;</button>
+          </div>
+          <div class="deck-info">
+            <div class="deck-counter">01 / 04</div>
+            <div class="deck-title">Grab Holdings (NQ:GRAB)</div>
+            <div class="deck-ctx">Equity research pitch deck — Student Investment Club</div>
+            <div class="deck-actions">
+              <a href="SMF%20Pitch%20Deck.pptx" download class="deck-dl">↓ Download</a>
+            </div>
+          </div>
+        </div>
+        <div class="deck-slide">
+          <img id="slide1" src="Sheng%20Shiong_Group%202/Slide1.JPG" class="slide-img">
+          <div class="ppt-nav">
+            <button class="ppt-btn" onclick="slideNav(1,-1)">&#8249;</button>
+            <span class="ppt-counter" id="slide1-counter">1 / 51</span>
+            <button class="ppt-btn" onclick="slideNav(1,1)">&#8250;</button>
+          </div>
+          <div class="deck-info">
+            <div class="deck-counter">02 / 04</div>
+            <div class="deck-title">Sheng Siong Group (SGX:OV8)</div>
+            <div class="deck-ctx">Equity research, Buy recommendation — Student Investment Club</div>
+            <div class="deck-actions">
+              <a href="Sheng%20Shiong_Group%202.pptx" download class="deck-dl">↓ Download</a>
+            </div>
+          </div>
+        </div>
+        <div class="deck-slide">
+          <img id="slide2" src="Team%208_Olam%20Agri%20Slide%20Deck/Slide2.JPG" class="slide-img">
+          <div class="ppt-nav">
+            <button class="ppt-btn" onclick="slideNav(2,-1)">&#8249;</button>
+            <span class="ppt-counter" id="slide2-counter">2 / 18</span>
+            <button class="ppt-btn" onclick="slideNav(2,1)">&#8250;</button>
+          </div>
+          <div class="deck-info">
+            <div class="deck-counter">03 / 04</div>
+            <div class="deck-title">Olam Agri — Closing Ghana's Rice Gap</div>
+            <div class="deck-ctx">Consulting case deck — Business Strategy Club</div>
+            <div class="deck-actions">
+              <a href="Team%208_Olam%20Agri%20Slide%20Deck.pptx" download class="deck-dl">↓ Download</a>
+            </div>
+          </div>
+        </div>
+        <div class="deck-slide">
+          <img id="slide3" src="Think%26Sell_Stage_2_solution/Slide1.JPG" class="slide-img">
+          <div class="ppt-nav">
+            <button class="ppt-btn" onclick="slideNav(3,-1)">&#8249;</button>
+            <span class="ppt-counter" id="slide3-counter">1 / 14</span>
+            <button class="ppt-btn" onclick="slideNav(3,1)">&#8250;</button>
+          </div>
+          <div class="deck-info">
+            <div class="deck-counter">04 / 04</div>
+            <div class="deck-title">Netflix — Reimagining Streaming</div>
+            <div class="deck-ctx">Think Cell Case Competition Stage 2 — Business Strategy Club</div>
+            <div class="deck-actions">
+              <a href="Think%26Sell_Stage_2_solution.pptx" download class="deck-dl">↓ Download</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="deck-nav">
+        <div class="deck-dots">
+          <div class="deck-dot active" data-i="0"></div>
+          <div class="deck-dot" data-i="1"></div>
+          <div class="deck-dot" data-i="2"></div>
+          <div class="deck-dot" data-i="3"></div>
+        </div>
+        <button class="deck-btn" id="deckPrev">&#8592;</button>
+        <button class="deck-btn" id="deckNext">&#8594;</button>
+      </div>
+    </div>
+
+    <div class="lc-sub-label">Volunteering</div>
+    <div class="vol-grid">
+      <div class="vol-card">
+        <div class="vol-org">Teenvestnow</div>
+        <div class="vol-period">2025</div>
+        <div class="vol-desc">Curated investment content to promote financial literacy among youth.</div>
+      </div>
+      <div class="vol-card">
+        <div class="vol-org">Willing Hearts</div>
+        <div class="vol-period">2025</div>
+        <div class="vol-desc">Prepared and packed meals for distribution to underprivileged communities.</div>
+      </div>
+      <div class="vol-card">
+        <div class="vol-org">Causes for Animals</div>
+        <div class="vol-period">2022 – 2024</div>
+        <div class="vol-desc">Assisted with feeding and care routines for shelter dogs.</div>
+      </div>
+      <div class="vol-card">
+        <div class="vol-org">St. Luke's ElderCare Whampoa</div>
+        <div class="vol-period">2022</div>
+        <div class="vol-desc">Supported elderly residents with arts and recreational activities.</div>
+      </div>
+      <div class="vol-card">
+        <div class="vol-org">Tuition for the Underprivileged</div>
+        <div class="vol-period">2022</div>
+        <div class="vol-desc">Provided free weekly academic support to a Primary 6 student.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="fade-in">
+    <p class="s-label">Skills</p>
+    <h2 class="s-title">What I Work With</h2>
+    <p class="s-sub">Built across real production projects — not just coursework.</p>
+  </div>
+  <div class="skills-grid fade-in">
+    <div class="sk-group">
+      <div class="sk-title">Languages</div>
+      <div class="sk-chips"><span class="sk-chip">Python</span><span class="sk-chip">JavaScript</span><span class="sk-chip">Java</span><span class="sk-chip">C#</span><span class="sk-chip">Dart</span><span class="sk-chip">HTML/CSS</span><span class="sk-chip">PHP</span></div>
+    </div>
+    <div class="sk-group">
+      <div class="sk-title">AI & Agents</div>
+      <div class="sk-chips"><span class="sk-chip">OpenAI GPT-4</span><span class="sk-chip">Claude AI</span><span class="sk-chip">Multi-Agent Systems</span><span class="sk-chip">Prompt Engineering</span></div>
+    </div>
+    <div class="sk-group">
+      <div class="sk-title">Cloud & Infra</div>
+      <div class="sk-chips"><span class="sk-chip">Azure SQL</span><span class="sk-chip">Azure Blob Storage</span><span class="sk-chip">Azure Functions</span><span class="sk-chip">Microsoft Graph API</span></div>
+    </div>
+    <div class="sk-group">
+      <div class="sk-title">Data & Databases</div>
+      <div class="sk-chips"><span class="sk-chip">MySQL</span><span class="sk-chip">Azure SQL</span><span class="sk-chip">SQL</span><span class="sk-chip">Excel</span></div>
+    </div>
+    <div class="sk-group">
+      <div class="sk-title">Frameworks & Tools</div>
+      <div class="sk-chips"><span class="sk-chip">Flask</span><span class="sk-chip">Flutter</span><span class="sk-chip">UiPath RPA</span><span class="sk-chip">Chart.js</span><span class="sk-chip">Visual Studio</span></div>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <p>© 2026 Jade Tan Hong Yu · Singapore</p>
+</footer>
+
+<script>
+const slideFolders = [
+  'SMF%20Pitch%20Deck',
+  'Sheng%20Shiong_Group%202',
+  'Team%208_Olam%20Agri%20Slide%20Deck',
+  'Think%26Sell_Stage_2_solution'
+];
+const slideCounts = [8, 51, 18, 14];
+const slideIdx = [1, 1, 2, 1];
+function slideNav(i, dir) {
+  const total = slideCounts[i];
+  const next = ((slideIdx[i] - 1 + dir + total) % total) + 1;
+  slideIdx[i] = next;
+  document.getElementById('slide'+i).src = slideFolders[i] + '/Slide' + next + '.JPG';
+  document.getElementById('slide'+i+'-counter').textContent = next + ' / ' + total;
+}
+
+history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+// Scroll-spy
+const sections = document.querySelectorAll('section[id]');
+const navAs = document.querySelectorAll('.nav-links a[href^="#"]');
+const spyObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navAs.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+e.target.id));
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => spyObs.observe(s));
+
+// Fade-in
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 100);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+// Deck carousel
+(function(){
+  const slides = document.getElementById('deckSlides');
+  const dots = document.querySelectorAll('.deck-dot');
+  let cur = 0;
+  const total = 4;
+  function go(n){
+    cur = (n + total) % total;
+    slides.style.transform = `translateX(-${cur * 100}%)`;
+    dots.forEach((d,i) => d.classList.toggle('active', i === cur));
+  }
+  document.getElementById('deckNext').addEventListener('click', () => go(cur + 1));
+  document.getElementById('deckPrev').addEventListener('click', () => go(cur - 1));
+  dots.forEach(d => d.addEventListener('click', () => go(+d.dataset.i)));
+})();
+</script>
+</body>
+</html>
